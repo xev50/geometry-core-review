@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>System Access</title>
+    <style>
+        body {
+            font-family: 'Courier New', Courier, monospace;
+            background-color: #050505;
+            color: #00ffcc;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+        .hub-container {
+            text-align: center;
+            border: 1px solid #00ffcc;
+            padding: 50px;
+            background-color: #0f0f11;
+            box-shadow: 0 0 20px rgba(0, 255, 204, 0.2);
+            border-radius: 5px;
+        }
+        h1 {
+            font-size: 2.5rem;
+            margin-top: 0;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            text-shadow: 0 0 10px #00ffcc;
+        }
+        .subtitle {
+            color: #aaa;
+            margin-bottom: 40px;
+            font-size: 0.9rem;
+        }
+        .nav-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .nav-btn {
+            display: block;
+            padding: 15px 30px;
+            background-color: transparent;
+            color: #00ffcc;
+            border: 1px solid #00ffcc;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 1.2rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            transition: all 0.3s ease;
+        }
+        .nav-btn:hover {
+            background-color: #00ffcc;
+            color: #050505;
+            box-shadow: 0 0 15px #00ffcc;
+            transform: scale(1.05);
+        }
+        .back-link {
+            display: block;
+            margin-top: 40px;
+            color: #555;
+            text-decoration: none;
+            font-size: 0.8rem;
+            transition: color 0.3s;
+        }
+        .back-link:hover {
+            color: #00ffcc;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="hub-container">
+        <h1>xev50's games</h1>
+        <div class="subtitle">Select your destination.</div>
+        
+        <div class="nav-buttons">
+            <!-- Link to your games grid -->
+            <a href="games.html" class="nav-btn">The Vault [Games]</a>
+            
+            <!-- Link to the future chat room -->
+            <a href="chat.html" class="nav-btn">Global Comms [Chat]</a>
+        </div>
+
+        <!-- Takes them back to the math disguise -->
+        <a href="index.html" class="back-link">Return to Study Guide</a>
+    </div>
+
+</body>
+</html>
