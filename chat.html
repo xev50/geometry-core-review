@@ -3,642 +3,389 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Comms Hub</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    colors: {
-                        brand: '#5865F2', // Approximation of the standard blue-purple button color
-                        dark: {
-                            server: '#1E1F22',
-                            channel: '#2B2D31',
-                            chat: '#313338',
-                            hover: '#3F4147',
-                            input: '#383A40',
-                            member: '#2B2D31'
-                        },
-                        light: {
-                            server: '#E3E5E8',
-                            channel: '#F2F3F5',
-                            chat: '#FFFFFF',
-                            hover: '#D4D7DC',
-                            input: '#EBEDEF',
-                            member: '#F2F3F5'
-                        }
-                    }
-                }
-            }
-        }
-    </script>
+    <title>Global Comms</title>
     <style>
-        /* Custom scrollbar to match the aesthetic */
-        ::-webkit-scrollbar {
-            width: 8px;
-            height: 8px;
+        :root {
+            --bg-server: #1e1f22;
+            --bg-sidebar: #2b2d31;
+            --bg-chat: #313338;
+            --text-main: #dbdee1;
+            --text-muted: #949ba4;
+            --accent: #5865F2;
+            --hover: #3f4147;
         }
-        ::-webkit-scrollbar-track {
-            background: transparent;
+
+        [data-theme="light"] {
+            --bg-server: #e3e5e8;
+            --bg-sidebar: #f2f3f5;
+            --bg-chat: #ffffff;
+            --text-main: #313338;
+            --text-muted: #5c5e66;
+            --accent: #5865F2;
+            --hover: #e0e1e5;
         }
-        .dark ::-webkit-scrollbar-thumb {
-            background-color: #1A1B1E;
-            border-radius: 4px;
-        }
-        .light ::-webkit-scrollbar-thumb {
-            background-color: #C4C9CE;
-            border-radius: 4px;
-        }
+
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            margin: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-chat);
+            color: var(--text-main);
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Far Left Server Bar */
+        .server-bar {
+            width: 72px;
+            background-color: var(--bg-server);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding-top: 12px;
+            gap: 10px;
+        }
+        .server-icon {
+            width: 48px;
+            height: 48px;
+            background-color: var(--bg-chat);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: 0.2s;
+            font-weight: bold;
+        }
+        .server-icon:hover {
+            border-radius: 16px;
+            background-color: var(--accent);
+            color: white;
+        }
+        .active-server {
+            border-radius: 16px;
+            background-color: var(--accent);
+            color: white;
+        }
+
+        /* Channel Sidebar */
+        .sidebar {
+            width: 240px;
+            background-color: var(--bg-sidebar);
+            display: flex;
+            flex-direction: column;
+        }
+        .sidebar-header {
+            padding: 16px;
+            font-weight: bold;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+        }
+        .channel-list {
+            padding: 10px;
+            flex-grow: 1;
+            overflow-y: auto;
+        }
+        .channel {
+            padding: 8px;
+            margin-bottom: 2px;
+            cursor: pointer;
+            border-radius: 4px;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .channel:hover, .channel.active {
+            background-color: var(--hover);
+            color: var(--text-main);
+        }
+        .settings-bar {
+            padding: 10px;
+            background-color: var(--bg-server);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .settings-btn {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        /* Main Chat Area */
+        .chat-area {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            background-color: var(--bg-chat);
+        }
+        .chat-header {
+            padding: 16px;
+            font-weight: bold;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .messages {
+            flex-grow: 1;
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        .message {
+            display: flex;
+            flex-direction: column;
+        }
+        .msg-header {
+            display: flex;
+            align-items: baseline;
+            gap: 10px;
+        }
+        .msg-author {
+            font-weight: bold;
+            color: var(--text-main);
+            cursor: pointer;
+        }
+        .msg-author:hover {
+            text-decoration: underline;
+        }
+        .msg-text {
+            margin-top: 5px;
+        }
+        .input-area {
+            padding: 20px;
+        }
+        .chat-input {
+            width: 100%;
+            background-color: var(--bg-sidebar);
+            border: none;
+            color: var(--text-main);
+            padding: 15px;
+            border-radius: 8px;
+            outline: none;
+            box-sizing: border-box;
+        }
+
+        /* Right Member List */
+        .member-list {
+            width: 240px;
+            background-color: var(--bg-sidebar);
+            padding: 20px 10px;
+        }
+        .member {
+            padding: 8px;
+            color: var(--text-muted);
+            cursor: pointer;
+            border-radius: 4px;
+        }
+        .member:hover {
+            background-color: var(--hover);
+            color: var(--text-main);
+        }
+
+        #rules-content {
+            display: none;
+            padding: 20px;
         }
     </style>
 </head>
-<body class="dark h-screen w-screen overflow-hidden flex bg-light-chat dark:bg-dark-chat text-gray-900 dark:text-gray-100 transition-colors duration-200">
+<body>
 
-    <!-- Far Left Sidebar (Servers/Home) -->
-    <div class="w-[72px] bg-light-server dark:bg-dark-server flex flex-col items-center py-3 gap-2 flex-shrink-0 z-20">
-        <!-- Home Button (DMs) -->
-        <div class="group relative flex items-center justify-center cursor-pointer" onclick="app.switchView('home')">
-            <div id="home-indicator" class="absolute left-0 w-1 bg-gray-800 dark:bg-white rounded-r-full transition-all duration-200 h-2"></div>
-            <div id="home-icon" class="w-12 h-12 rounded-[24px] hover:rounded-[16px] bg-white dark:bg-[#313338] hover:bg-brand text-gray-800 dark:text-gray-200 hover:text-white flex items-center justify-center transition-all duration-200">
-                <svg class="w-7 h-7" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2L2 12h3v8h6v-6h2v6h6v-8h3L12 2z"/></svg>
+    <!-- Server Bar -->
+    <div class="server-bar">
+        <div class="server-icon active-server">PUB</div>
+        <div class="server-icon" id="dm-icon">DMs</div>
+    </div>
+
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="sidebar-header" id="sidebar-title">Public Server</div>
+        <div class="channel-list" id="channel-list">
+            <div class="channel active" onclick="switchChannel('general')"># general</div>
+            <div class="channel" onclick="switchChannel('rules')"># rules</div>
+        </div>
+        <div class="settings-bar">
+            <span id="display-name">Loading...</span>
+            <div>
+                <button class="settings-btn" onclick="toggleTheme()">🌓</button>
+                <button class="settings-btn" onclick="changeName()">⚙️</button>
             </div>
         </div>
+    </div>
+
+    <!-- Chat Area -->
+    <div class="chat-area">
+        <div class="chat-header" id="chat-header"># general</div>
         
-        <div class="w-8 h-[2px] bg-gray-300 dark:bg-gray-700 rounded-full my-1"></div>
-        
-        <!-- Public Server Button -->
-        <div class="group relative flex items-center justify-center cursor-pointer" onclick="app.switchView('server')">
-            <div id="server-indicator" class="absolute left-0 w-1 bg-gray-800 dark:bg-white rounded-r-full transition-all duration-200 h-2"></div>
-            <div id="server-icon" class="w-12 h-12 rounded-[24px] hover:rounded-[16px] bg-white dark:bg-[#313338] hover:bg-brand text-gray-800 dark:text-gray-200 hover:text-white flex items-center justify-center transition-all duration-200 overflow-hidden font-bold text-xl">
-                PS
-            </div>
+        <div class="messages" id="messages">
+            <!-- Messages load here -->
+        </div>
+
+        <div id="rules-content">
+            <h2>Server Rules</h2>
+            <ol>
+                <li>No slurs or offensive language. The automod will censor it.</li>
+                <li>No NSFW content or discussions.</li>
+                <li>Be respectful to others in the chat.</li>
+            </ol>
+        </div>
+
+        <div class="input-area" id="input-area">
+            <input type="text" class="chat-input" id="message-input" placeholder="Message #general" onkeypress="handleKeyPress(event)">
         </div>
     </div>
 
-    <!-- Second Sidebar (Channels / DMs) -->
-    <div class="w-60 bg-light-channel dark:bg-dark-channel flex flex-col flex-shrink-0 z-10 border-r border-gray-300 dark:border-gray-800">
-        <!-- Header -->
-        <div id="sidebar-header" class="h-12 flex items-center px-4 font-bold border-b border-gray-300 dark:border-gray-900 shadow-sm">
-            Public Server
-        </div>
-        
-        <!-- Lists -->
-        <div class="flex-1 overflow-y-auto p-2" id="sidebar-content">
-            <!-- Populated via JS -->
-        </div>
-
-        <!-- User Profile Area -->
-        <div class="h-[52px] bg-light-server dark:bg-[#232428] flex items-center px-2 gap-2 flex-shrink-0">
-            <div class="w-8 h-8 rounded-full bg-brand flex items-center justify-center text-white font-bold flex-shrink-0" id="current-user-avatar">
-                ?
-            </div>
-            <div class="flex-1 min-w-0">
-                <div class="text-sm font-bold truncate" id="current-user-name">Loading...</div>
-                <div class="text-xs text-gray-500 truncate" id="current-user-status">Online</div>
-            </div>
-            <button onclick="app.openSettings()" class="w-8 h-8 rounded flex items-center justify-center hover:bg-light-hover dark:hover:bg-dark-hover text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 transition-colors">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
-            </button>
-        </div>
+    <!-- Member List -->
+    <div class="member-list" id="member-list-ui">
+        <div style="font-size: 12px; font-weight: bold; margin-bottom: 10px; color: var(--text-muted);">ONLINE</div>
+        <!-- Members load here -->
     </div>
 
-    <!-- Main Chat Area -->
-    <div class="flex-1 flex flex-col min-w-0 bg-light-chat dark:bg-dark-chat">
-        <!-- Top Bar -->
-        <div class="h-12 flex items-center px-4 border-b border-gray-300 dark:border-gray-800 shadow-sm gap-2">
-            <svg class="w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" id="chat-header-icon"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14"></path></svg>
-            <span class="font-bold text-lg" id="chat-header-title">general</span>
-        </div>
-        
-        <!-- Messages Array -->
-        <div class="flex-1 overflow-y-auto p-4 flex flex-col gap-4" id="messages-container">
-            <!-- Messages populated here -->
-        </div>
-
-        <!-- Input Area -->
-        <div class="p-4 pt-0" id="input-container">
-            <div class="bg-light-input dark:bg-dark-input rounded-lg px-4 py-3 flex items-center gap-3">
-                <input type="text" id="message-input" class="flex-1 bg-transparent outline-none placeholder-gray-500 dark:placeholder-gray-400" placeholder="Message #general..." onkeypress="app.handleKeyPress(event)">
-            </div>
-        </div>
-    </div>
-
-    <!-- Members Sidebar (Right) -->
-    <div class="w-60 bg-light-member dark:bg-dark-member hidden lg:flex flex-col flex-shrink-0" id="members-sidebar">
-        <div class="p-4 font-bold text-xs uppercase text-gray-500 dark:text-gray-400 tracking-wider">
-            Members — <span id="member-count">0</span>
-        </div>
-        <div class="flex-1 overflow-y-auto px-2" id="members-list">
-            <!-- Populated via JS -->
-        </div>
-    </div>
-
-    <!-- Settings Modal -->
-    <div id="settings-modal" class="fixed inset-0 bg-black/60 z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-light-chat dark:bg-dark-chat w-full max-w-md rounded-lg shadow-xl p-6 relative">
-            <button onclick="app.closeSettings()" class="absolute top-4 right-4 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-            </button>
-            <h2 class="text-2xl font-bold mb-6">User Settings</h2>
-            
-            <div class="mb-6">
-                <label class="block text-xs font-bold uppercase text-gray-500 dark:text-gray-400 mb-2">Display Name</label>
-                <input type="text" id="settings-name-input" class="w-full bg-light-input dark:bg-dark-input rounded p-2 outline-none focus:ring-2 focus:ring-brand">
-            </div>
-
-            <div class="mb-8">
-                <label class="block text-xs font-bold uppercase text-gray-500 dark:text-gray-400 mb-2">Appearance</label>
-                <div class="flex gap-4">
-                    <button onclick="app.setTheme('dark')" id="btn-theme-dark" class="flex-1 py-2 rounded bg-dark-input text-white border-2 border-transparent hover:border-gray-500 focus:border-brand">Dark</button>
-                    <button onclick="app.setTheme('light')" id="btn-theme-light" class="flex-1 py-2 rounded bg-gray-200 text-black border-2 border-transparent hover:border-gray-400 focus:border-brand">Light</button>
-                </div>
-            </div>
-
-            <div class="flex justify-end gap-3">
-                <button onclick="app.closeSettings()" class="px-4 py-2 hover:underline">Cancel</button>
-                <button onclick="app.saveSettings()" class="px-4 py-2 bg-brand text-white rounded hover:bg-indigo-600 transition-colors">Save Changes</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Alert Modal -->
-    <div id="alert-modal" class="fixed inset-0 bg-black/60 z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-light-chat dark:bg-dark-chat w-full max-w-sm rounded-lg shadow-xl p-6 text-center">
-            <div class="text-red-500 mb-4 flex justify-center">
-                <svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
-            </div>
-            <h3 class="text-xl font-bold mb-2" id="alert-title">Alert</h3>
-            <p class="text-gray-600 dark:text-gray-400 mb-6" id="alert-message">Message blocked.</p>
-            <button onclick="app.closeAlert()" class="px-6 py-2 bg-brand text-white rounded hover:bg-indigo-600 transition-colors w-full">Got it</button>
-        </div>
-    </div>
-
+    <!-- Firebase SDK Setup -->
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, getDoc, setDoc, updateDoc, collection, onSnapshot, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getDatabase, ref, push, onChildAdded, set, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-comms-app';
-        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
-        
-        let db, auth;
-
-        // Moderation list
-        const FORBIDDEN_WORDS = ['slur', 'nsfw', 'fuck', 'shit', 'bitch']; 
-
-        // Application State
-        window.app = {
-            currentUser: null,
-            users: {},
-            dms: [], // UIDs of people we have DMs with
-            currentView: 'server', // 'server' | 'home'
-            currentChannel: 'general', // 'general' | 'rules' | 'dm_uid_uid'
-            unsubscribeMessages: null,
-            unsubscribeUsers: null,
-
-            // Core Initialization
-            init: async function() {
-                if (Object.keys(firebaseConfig).length === 0) {
-                    this.showAlert("System Error", "Firebase configuration is missing.");
-                    return;
-                }
-
-                const appInstance = initializeApp(firebaseConfig);
-                db = getFirestore(appInstance);
-                auth = getAuth(appInstance);
-
-                try {
-                    const token = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
-                    if (token) {
-                        await signInWithCustomToken(auth, token);
-                    } else {
-                        await signInAnonymously(auth);
-                    }
-                    
-                    const user = auth.currentUser;
-                    await this.initUserProfile(user.uid);
-                    this.listenToUsers();
-                    this.switchView('server'); // Initial render
-                    
-                } catch (error) {
-                    console.error("Auth error:", error);
-                    this.showAlert("Connection Error", "Failed to connect to the server.");
-                }
-            },
-
-            initUserProfile: async function(uid) {
-                const userRef = doc(db, 'artifacts', appId, 'public', 'data', 'users', uid);
-                const userSnap = await getDoc(userRef);
-                
-                if (!userSnap.exists()) {
-                    const defaultName = "User_" + Math.floor(Math.random() * 10000);
-                    this.currentUser = { uid, displayName: defaultName, theme: 'dark', dms: [] };
-                    await setDoc(userRef, this.currentUser);
-                } else {
-                    this.currentUser = { uid, ...userSnap.data() };
-                    // Ensure dms array exists
-                    if (!this.currentUser.dms) {
-                        this.currentUser.dms = [];
-                        await updateDoc(userRef, { dms: [] });
-                    }
-                }
-                
-                this.updateUIProfile();
-                this.applyTheme(this.currentUser.theme || 'dark');
-            },
-
-            listenToUsers: function() {
-                const usersRef = collection(db, 'artifacts', appId, 'public', 'data', 'users');
-                this.unsubscribeUsers = onSnapshot(usersRef, (snap) => {
-                    snap.docs.forEach(doc => {
-                        this.users[doc.id] = { uid: doc.id, ...doc.data() };
-                    });
-                    this.renderMembersList();
-                    if (this.currentView === 'home') {
-                        this.renderSidebarList(); // Update DM names if they change
-                    }
-                    // Refresh current channel header if in DM
-                    if (this.currentChannel.startsWith('dm_')) this.updateChatHeader();
-                }, (error) => {
-                    console.error("Users sync error", error);
-                });
-            },
-
-            switchView: function(view) {
-                this.currentView = view;
-                
-                // Update side nav indicators
-                document.getElementById('server-icon').className = `w-12 h-12 rounded-[24px] hover:rounded-[16px] flex items-center justify-center transition-all duration-200 overflow-hidden font-bold text-xl ${view === 'server' ? 'bg-brand text-white rounded-[16px]' : 'bg-white dark:bg-[#313338] hover:bg-brand text-gray-800 dark:text-gray-200 hover:text-white'}`;
-                document.getElementById('server-indicator').style.height = view === 'server' ? '40px' : '0px';
-
-                document.getElementById('home-icon').className = `w-12 h-12 rounded-[24px] hover:rounded-[16px] flex items-center justify-center transition-all duration-200 ${view === 'home' ? 'bg-brand text-white rounded-[16px]' : 'bg-white dark:bg-[#313338] hover:bg-brand text-gray-800 dark:text-gray-200 hover:text-white'}`;
-                document.getElementById('home-indicator').style.height = view === 'home' ? '40px' : '0px';
-
-                document.getElementById('sidebar-header').innerText = view === 'server' ? 'Public Server' : 'Direct Messages';
-                document.getElementById('members-sidebar').style.display = view === 'server' ? 'flex' : 'none';
-
-                if (view === 'server') {
-                    this.switchChannel('general');
-                } else {
-                    if (this.currentUser.dms && this.currentUser.dms.length > 0) {
-                        this.startDM(this.currentUser.dms[0]); // Open first DM
-                    } else {
-                        // Empty DM state
-                        this.currentChannel = 'empty_dms';
-                        this.updateChatHeader();
-                        document.getElementById('messages-container').innerHTML = `
-                            <div class="flex-1 flex flex-col items-center justify-center text-gray-500">
-                                <svg class="w-20 h-20 mb-4 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z"></path></svg>
-                                <span>It's quiet here... Click someone in the server to start a chat.</span>
-                            </div>
-                        `;
-                        document.getElementById('input-container').style.display = 'none';
-                    }
-                }
-                this.renderSidebarList();
-            },
-
-            switchChannel: function(channelId) {
-                this.currentChannel = channelId;
-                this.renderSidebarList();
-                this.updateChatHeader();
-                
-                if (channelId === 'rules') {
-                    document.getElementById('input-container').style.display = 'none';
-                    this.renderRulesChannel();
-                    if (this.unsubscribeMessages) {
-                        this.unsubscribeMessages();
-                        this.unsubscribeMessages = null;
-                    }
-                } else {
-                    document.getElementById('input-container').style.display = 'block';
-                    document.getElementById('message-input').placeholder = channelId.startsWith('dm_') ? 'Message @user...' : `Message #${channelId}...`;
-                    this.listenToMessages(channelId);
-                }
-            },
-
-            listenToMessages: function(channelId) {
-                if (this.unsubscribeMessages) this.unsubscribeMessages();
-
-                const messagesRef = collection(db, 'artifacts', appId, 'public', 'data', `messages_${channelId}`);
-                
-                this.unsubscribeMessages = onSnapshot(messagesRef, (snap) => {
-                    let msgs = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                    // Sort in memory per system rules
-                    msgs.sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0));
-                    this.renderMessages(msgs);
-                }, (error) => {
-                    console.error("Messages sync error", error);
-                });
-            },
-
-            handleKeyPress: async function(e) {
-                if (e.key === 'Enter') {
-                    const input = document.getElementById('message-input');
-                    const text = input.value.trim();
-                    if (!text) return;
-
-                    // Moderation check
-                    const textLower = text.toLowerCase();
-                    if (FORBIDDEN_WORDS.some(w => textLower.includes(w))) {
-                        this.showAlert("Message Blocked", "Your message contains inappropriate content that violates the server rules.");
-                        return;
-                    }
-
-                    input.value = '';
-                    
-                    try {
-                        const messagesRef = collection(db, 'artifacts', appId, 'public', 'data', `messages_${this.currentChannel}`);
-                        await addDoc(messagesRef, {
-                            text: text,
-                            senderId: this.currentUser.uid,
-                            senderName: this.currentUser.displayName,
-                            timestamp: Date.now()
-                        });
-                    } catch (error) {
-                        console.error("Error sending message:", error);
-                        this.showAlert("Error", "Failed to send message.");
-                    }
-                }
-            },
-
-            startDM: async function(targetUid) {
-                if (targetUid === this.currentUser.uid) return;
-
-                // Add to DM list if not exists
-                if (!this.currentUser.dms) this.currentUser.dms = [];
-                if (!this.currentUser.dms.includes(targetUid)) {
-                    this.currentUser.dms.push(targetUid);
-                    const userRef = doc(db, 'artifacts', appId, 'public', 'data', 'users', this.currentUser.uid);
-                    await updateDoc(userRef, { dms: this.currentUser.dms });
-                }
-
-                // Force home view and generate unique deterministic channel ID
-                const uids = [this.currentUser.uid, targetUid].sort();
-                const dmChannelId = `dm_${uids[0]}_${uids[1]}`;
-                
-                if (this.currentView !== 'home') {
-                    this.switchView('home'); // this will auto-select the first DM, we override it below
-                }
-                this.switchChannel(dmChannelId);
-            },
-
-            renderSidebarList: function() {
-                const container = document.getElementById('sidebar-content');
-                container.innerHTML = '';
-
-                if (this.currentView === 'server') {
-                    const channels = [
-                        { id: 'general', icon: '#' },
-                        { id: 'rules', icon: '#' }
-                    ];
-
-                    channels.forEach(ch => {
-                        const isActive = this.currentChannel === ch.id;
-                        const el = document.createElement('div');
-                        el.className = `flex items-center gap-2 px-2 py-1.5 mx-2 rounded cursor-pointer mb-1 ${isActive ? 'bg-gray-300 dark:bg-[#3F4147] text-gray-900 dark:text-gray-100' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-[#35373C] hover:text-gray-800 dark:hover:text-gray-300'}`;
-                        el.onclick = () => this.switchChannel(ch.id);
-                        el.innerHTML = `<span class="text-xl font-light">${ch.icon}</span> <span class="font-medium">${ch.id}</span>`;
-                        container.appendChild(el);
-                    });
-                } else {
-                    if (this.currentUser && this.currentUser.dms) {
-                        this.currentUser.dms.forEach(uid => {
-                            const user = this.users[uid];
-                            const name = user ? user.displayName : 'Unknown User';
-                            const uids = [this.currentUser.uid, uid].sort();
-                            const dmId = `dm_${uids[0]}_${uids[1]}`;
-                            const isActive = this.currentChannel === dmId;
-
-                            const el = document.createElement('div');
-                            el.className = `flex items-center gap-3 px-2 py-2 mx-2 rounded cursor-pointer mb-1 ${isActive ? 'bg-gray-300 dark:bg-[#3F4147] text-gray-900 dark:text-gray-100' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-[#35373C] hover:text-gray-800 dark:hover:text-gray-300'}`;
-                            el.onclick = () => this.switchChannel(dmId);
-                            el.innerHTML = `
-                                <div class="w-8 h-8 rounded-full bg-brand flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
-                                    ${name.charAt(0).toUpperCase()}
-                                </div>
-                                <span class="font-medium truncate">${name}</span>
-                            `;
-                            container.appendChild(el);
-                        });
-                    }
-                }
-            },
-
-            renderMembersList: function() {
-                const container = document.getElementById('members-list');
-                const countEl = document.getElementById('member-count');
-                if (!container) return;
-                
-                container.innerHTML = '';
-                const userVals = Object.values(this.users);
-                countEl.innerText = userVals.length;
-
-                userVals.forEach(u => {
-                    const isMe = u.uid === this.currentUser?.uid;
-                    const el = document.createElement('div');
-                    el.className = `flex items-center gap-3 px-2 py-2 rounded mb-1 cursor-pointer hover:bg-light-hover dark:hover:bg-[#35373C] group`;
-                    if (!isMe) {
-                        el.onclick = () => this.startDM(u.uid);
-                    }
-                    el.innerHTML = `
-                        <div class="relative flex-shrink-0">
-                            <div class="w-8 h-8 rounded-full bg-brand flex items-center justify-center text-white font-bold text-sm">
-                                ${u.displayName.charAt(0).toUpperCase()}
-                            </div>
-                            <div class="absolute -bottom-1 -right-1 w-3.5 h-3.5 bg-green-500 border-2 border-light-member dark:border-dark-member rounded-full"></div>
-                        </div>
-                        <span class="font-medium truncate group-hover:text-gray-900 dark:group-hover:text-gray-100 text-gray-700 dark:text-gray-300 ${isMe ? 'opacity-70' : ''}">${u.displayName}</span>
-                        ${!isMe ? '<svg class="w-4 h-4 ml-auto opacity-0 group-hover:opacity-100 text-gray-400" fill="currentColor" viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"></path></svg>' : ''}
-                    `;
-                    container.appendChild(el);
-                });
-            },
-
-            renderMessages: function(messages) {
-                const container = document.getElementById('messages-container');
-                container.innerHTML = '';
-                let lastSenderId = null;
-
-                messages.forEach(msg => {
-                    const el = document.createElement('div');
-                    const isNewSender = lastSenderId !== msg.senderId;
-                    
-                    if (isNewSender) {
-                        el.className = 'mt-4 flex gap-4 hover:bg-light-hover dark:hover:bg-[#2E3035] -mx-4 px-4 py-1';
-                        const timeString = msg.timestamp ? new Date(msg.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : '';
-                        
-                        // Check if sender is me, if not, allow clicking to DM
-                        const isMe = msg.senderId === this.currentUser?.uid;
-                        const nameClass = isMe ? 'text-brand font-medium cursor-default' : 'text-green-500 font-medium cursor-pointer hover:underline';
-                        const onClickAttr = isMe ? '' : `onclick="app.startDM('${msg.senderId}')"`;
-
-                        el.innerHTML = `
-                            <div class="w-10 h-10 rounded-full bg-brand flex items-center justify-center text-white font-bold flex-shrink-0 mt-1 cursor-pointer" ${onClickAttr}>
-                                ${(msg.senderName || '?').charAt(0).toUpperCase()}
-                            </div>
-                            <div class="flex-1 min-w-0">
-                                <div class="flex items-baseline gap-2">
-                                    <span class="${nameClass}" ${onClickAttr}>${msg.senderName}</span>
-                                    <span class="text-xs text-gray-500">${timeString}</span>
-                                </div>
-                                <div class="text-gray-800 dark:text-gray-200 leading-relaxed whitespace-pre-wrap break-words">${this.escapeHTML(msg.text)}</div>
-                            </div>
-                        `;
-                    } else {
-                        el.className = 'flex gap-4 hover:bg-light-hover dark:hover:bg-[#2E3035] -mx-4 px-4 py-0.5 group';
-                        el.innerHTML = `
-                            <div class="w-10 flex-shrink-0 text-right pr-2">
-                                <span class="text-[10px] text-gray-500 opacity-0 group-hover:opacity-100">${msg.timestamp ? new Date(msg.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : ''}</span>
-                            </div>
-                            <div class="flex-1 min-w-0 text-gray-800 dark:text-gray-200 leading-relaxed whitespace-pre-wrap break-words">${this.escapeHTML(msg.text)}</div>
-                        `;
-                    }
-                    container.appendChild(el);
-                    lastSenderId = msg.senderId;
-                });
-                container.scrollTop = container.scrollHeight;
-            },
-
-            renderRulesChannel: function() {
-                const container = document.getElementById('messages-container');
-                container.innerHTML = `
-                    <div class="flex flex-col items-center justify-center h-full text-center max-w-lg mx-auto">
-                        <svg class="w-24 h-24 text-brand mb-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
-                        <h1 class="text-3xl font-bold mb-4">Welcome to the Server</h1>
-                        <p class="text-gray-500 mb-8">Please read the rules carefully before participating in the community.</p>
-                        
-                        <div class="bg-gray-200 dark:bg-[#2B2D31] p-6 rounded-lg text-left w-full shadow-inner border border-gray-300 dark:border-gray-800">
-                            <h2 class="text-xl font-bold mb-4 text-brand">Server Rules</h2>
-                            <ol class="list-decimal pl-5 space-y-3 text-gray-700 dark:text-gray-300">
-                                <li><strong>Be Respectful:</strong> Absolutely no slurs, hate speech, or harassment will be tolerated.</li>
-                                <li><strong>Keep it Clean:</strong> No NSFW (Not Safe For Work) content, images, or language. Keep discussions appropriate for all ages.</li>
-                                <li><strong>No Spamming:</strong> Avoid sending repetitive messages or flooding the chat.</li>
-                                <li><strong>Have Fun:</strong> We are here to learn and build cool things!</li>
-                            </ol>
-                        </div>
-                    </div>
-                `;
-            },
-
-            updateChatHeader: function() {
-                const title = document.getElementById('chat-header-title');
-                const icon = document.getElementById('chat-header-icon');
-                
-                if (this.currentChannel === 'rules') {
-                    title.innerText = 'rules';
-                    icon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>';
-                } else if (this.currentChannel.startsWith('dm_')) {
-                    // Extract other user's name
-                    const uids = this.currentChannel.replace('dm_', '').split('_');
-                    const otherUid = uids.find(id => id !== this.currentUser.uid) || uids[0]; // fallback if self DM
-                    const otherName = this.users[otherUid] ? this.users[otherUid].displayName : 'Unknown User';
-                    
-                    title.innerText = otherName;
-                    icon.innerHTML = '<path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"></path>';
-                } else {
-                    title.innerText = this.currentChannel;
-                    icon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14"></path>';
-                }
-            },
-
-            updateUIProfile: function() {
-                if(!this.currentUser) return;
-                document.getElementById('current-user-name').innerText = this.currentUser.displayName;
-                document.getElementById('current-user-avatar').innerText = this.currentUser.displayName.charAt(0).toUpperCase();
-            },
-
-            openSettings: function() {
-                document.getElementById('settings-name-input').value = this.currentUser.displayName;
-                this.updateThemeButtons(this.currentUser.theme);
-                document.getElementById('settings-modal').classList.remove('hidden');
-            },
-
-            closeSettings: function() {
-                document.getElementById('settings-modal').classList.add('hidden');
-                // Revert theme preview if cancelled
-                this.applyTheme(this.currentUser.theme);
-            },
-
-            saveSettings: async function() {
-                const newName = document.getElementById('settings-name-input').value.trim() || 'User';
-                const newTheme = document.body.classList.contains('dark') ? 'dark' : 'light';
-                
-                this.currentUser.displayName = newName;
-                this.currentUser.theme = newTheme;
-                
-                const userRef = doc(db, 'artifacts', appId, 'public', 'data', 'users', this.currentUser.uid);
-                await updateDoc(userRef, { 
-                    displayName: newName,
-                    theme: newTheme
-                });
-
-                this.updateUIProfile();
-                this.closeSettings();
-            },
-
-            setTheme: function(theme) {
-                this.applyTheme(theme);
-                this.updateThemeButtons(theme);
-            },
-
-            applyTheme: function(theme) {
-                if (theme === 'dark') {
-                    document.body.classList.add('dark');
-                    document.body.style.colorScheme = 'dark';
-                } else {
-                    document.body.classList.remove('dark');
-                    document.body.style.colorScheme = 'light';
-                }
-            },
-
-            updateThemeButtons: function(theme) {
-                const darkBtn = document.getElementById('btn-theme-dark');
-                const lightBtn = document.getElementById('btn-theme-light');
-                
-                if (theme === 'dark') {
-                    darkBtn.classList.add('border-brand');
-                    darkBtn.classList.remove('border-transparent');
-                    lightBtn.classList.remove('border-brand');
-                    lightBtn.classList.add('border-transparent');
-                } else {
-                    lightBtn.classList.add('border-brand');
-                    lightBtn.classList.remove('border-transparent');
-                    darkBtn.classList.remove('border-brand');
-                    darkBtn.classList.add('border-transparent');
-                }
-            },
-
-            showAlert: function(title, message) {
-                document.getElementById('alert-title').innerText = title;
-                document.getElementById('alert-message').innerText = message;
-                document.getElementById('alert-modal').classList.remove('hidden');
-            },
-
-            closeAlert: function() {
-                document.getElementById('alert-modal').classList.add('hidden');
-            },
-
-            escapeHTML: function(str) {
-                return str.replace(/[&<>'"]/g, 
-                    tag => ({
-                        '&': '&amp;',
-                        '<': '&lt;',
-                        '>': '&gt;',
-                        "'": '&#39;',
-                        '"': '&quot;'
-                    }[tag])
-                );
-            }
+        // ==========================================
+        // PASTE YOUR FIREBASE CONFIG HERE
+        // ==========================================
+        const firebaseConfig = {
+            apiKey: "AIzaSyDegqgPPUUXHnfe3ZcZ8K8BG4t-RUEVlUQ",
+            authDomain: "publicchat-1a6fa.firebaseapp.com",
+            databaseURL: "https://publicchat-1a6fa-default-rtdb.firebaseio.com/",
+            projectId: "publicchat-1a6fa",
+            storageBucket: "publicchat-1a6fa.firebasestorage.app",
+            messagingSenderId: "955917233953",
+            appId: "1:955917233953:web:fb8f38bc2bd1b0ace29860"
         };
+        // ==========================================
 
-        // Bootstrap App
-        window.addEventListener('DOMContentLoaded', () => {
-            app.init();
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        // User Setup
+        let myName = localStorage.getItem("chatUsername");
+        if (!myName) {
+            myName = prompt("Enter your username:");
+            localStorage.setItem("chatUsername", myName);
+        }
+        document.getElementById("display-name").innerText = myName;
+
+        // Add user to online list
+        set(ref(db, 'users/' + myName), { online: true });
+
+        // Moderation Filter (Add words here to block them)
+        const blocklist = ["slur1", "slur2", "nsfwword1", "nsfwword2"];
+        
+        window.filterMessage = function(text) {
+            let filtered = text;
+            blocklist.forEach(word => {
+                const regex = new RegExp(`\\b${word}\\b`, "gi");
+                filtered = filtered.replace(regex, "***");
+            });
+            return filtered;
+        }
+
+        // Send Message
+        window.handleKeyPress = function(e) {
+            if (e.key === 'Enter') {
+                const input = document.getElementById("message-input");
+                let text = input.value.trim();
+                
+                if (text !== "") {
+                    text = filterMessage(text); // Apply automod
+                    push(ref(db, 'messages/general'), {
+                        author: myName,
+                        text: text,
+                        timestamp: Date.now()
+                    });
+                    input.value = "";
+                }
+            }
+        }
+
+        // Listen for new messages
+        const messagesDiv = document.getElementById("messages");
+        onChildAdded(ref(db, 'messages/general'), (snapshot) => {
+            const data = snapshot.val();
+            const msgElement = document.createElement("div");
+            msgElement.className = "message";
+            msgElement.innerHTML = `
+                <div class="msg-header">
+                    <span class="msg-author" onclick="startDM('${data.author}')">${data.author}</span>
+                </div>
+                <div class="msg-text">${data.text}</div>
+            `;
+            messagesDiv.appendChild(msgElement);
+            messagesDiv.scrollTop = messagesDiv.scrollHeight; // Auto-scroll
         });
+
+        // Listen for online users
+        const memberListUI = document.getElementById("member-list-ui");
+        onValue(ref(db, 'users'), (snapshot) => {
+            // Clear current list (keeping the header)
+            memberListUI.innerHTML = '<div style="font-size: 12px; font-weight: bold; margin-bottom: 10px; color: var(--text-muted);">ONLINE</div>';
+            snapshot.forEach((childSnapshot) => {
+                const user = childSnapshot.key;
+                const memDiv = document.createElement("div");
+                memDiv.className = "member";
+                memDiv.innerText = user;
+                memDiv.onclick = () => startDM(user);
+                memberListUI.appendChild(memDiv);
+            });
+        });
+
+        // UI Interactions
+        window.switchChannel = function(channel) {
+            const msgs = document.getElementById("messages");
+            const input = document.getElementById("input-area");
+            const rules = document.getElementById("rules-content");
+            const header = document.getElementById("chat-header");
+
+            if (channel === 'rules') {
+                msgs.style.display = "none";
+                input.style.display = "none";
+                rules.style.display = "block";
+                header.innerText = "# rules";
+            } else {
+                msgs.style.display = "flex";
+                input.style.display = "block";
+                rules.style.display = "none";
+                header.innerText = "# general";
+            }
+        }
+
+        window.toggleTheme = function() {
+            const body = document.body;
+            if (body.getAttribute("data-theme") === "light") {
+                body.removeAttribute("data-theme");
+            } else {
+                body.setAttribute("data-theme", "light");
+            }
+        }
+
+        window.changeName = function() {
+            const newName = prompt("Enter new username:");
+            if (newName) {
+                // Remove old name from DB, add new name
+                set(ref(db, 'users/' + myName), null);
+                myName = newName;
+                localStorage.setItem("chatUsername", myName);
+                document.getElementById("display-name").innerText = myName;
+                set(ref(db, 'users/' + myName), { online: true });
+            }
+        }
+
+        // Groundwork for DMs
+        window.startDM = function(targetUser) {
+            if (targetUser === myName) return;
+            alert(`DM feature clicked for: ${targetUser}. To implement this fully, we will generate a unique database path based on your two usernames!`);
+        }
     </script>
 </body>
 </html>
