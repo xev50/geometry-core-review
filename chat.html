@@ -198,7 +198,7 @@
 
     <!-- Server Bar -->
     <div class="server-bar">
-        <div class="server-icon active-server">PUB</div>
+        <div class="server-icon active-server" id="pub-icon">PUB</div>
         <div class="server-icon" id="dm-icon">DMs</div>
     </div>
 
@@ -251,9 +251,6 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getDatabase, ref, push, onChildAdded, set, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
-        // ==========================================
-        // PASTE YOUR FIREBASE CONFIG HERE
-        // ==========================================
         const firebaseConfig = {
             apiKey: "AIzaSyDegqgPPUUXHnfe3ZcZ8K8BG4t-RUEVlUQ",
             authDomain: "publicchat-1a6fa.firebaseapp.com",
@@ -263,7 +260,6 @@
             messagingSenderId: "955917233953",
             appId: "1:955917233953:web:fb8f38bc2bd1b0ace29860"
         };
-        // ==========================================
 
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
@@ -279,7 +275,11 @@
         // Add user to online list
         set(ref(db, 'users/' + myName), { online: true });
 
-        // Moderation Filter (Add words here to block them)
+        // App States
+        let currentView = "public"; // 'public' or 'dm'
+        let currentDMUser = "";
+
+        // Moderation Filter
         const blocklist = ["slur1", "slur2", "nsfwword1", "nsfwword2"];
         
         window.filterMessage = function(text) {
@@ -291,7 +291,35 @@
             return filtered;
         }
 
-        // Send Message
+        // Load Public Messages on Startup
+        loadPublicMessages();
+
+        function loadPublicMessages() {
+            const messagesDiv = document.getElementById("messages");
+            messagesDiv.innerHTML = "";
+            
+            onChildAdded(ref(db, 'messages/general'), (snapshot) => {
+                if (currentView !== "public") return;
+                const data = snapshot.val();
+                appendMessage(data.author, data.text);
+            });
+        }
+
+        function appendMessage(author, text) {
+            const messagesDiv = document.getElementById("messages");
+            const msgElement = document.createElement("div");
+            msgElement.className = "message";
+            msgElement.innerHTML = `
+                <div class="msg-header">
+                    <span class="msg-author" onclick="startDM('${author}')">${author}</span>
+                </div>
+                <div class="msg-text">${text}</div>
+            `;
+            messagesDiv.appendChild(msgElement);
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        }
+
+        // Send Message (Public or DMs)
         window.handleKeyPress = function(e) {
             if (e.key === 'Enter') {
                 const input = document.getElementById("message-input");
@@ -299,36 +327,29 @@
                 
                 if (text !== "") {
                     text = filterMessage(text); // Apply automod
-                    push(ref(db, 'messages/general'), {
-                        author: myName,
-                        text: text,
-                        timestamp: Date.now()
-                    });
+                    
+                    if (currentView === "public") {
+                        push(ref(db, 'messages/general'), {
+                            author: myName,
+                            text: text,
+                            timestamp: Date.now()
+                        });
+                    } else if (currentView === "dm") {
+                        const dmPathId = [myName, currentDMUser].sort().join("_");
+                        push(ref(db, 'dms/' + dmPathId), {
+                            author: myName,
+                            text: text,
+                            timestamp: Date.now()
+                        });
+                    }
                     input.value = "";
                 }
             }
         }
 
-        // Listen for new messages
-        const messagesDiv = document.getElementById("messages");
-        onChildAdded(ref(db, 'messages/general'), (snapshot) => {
-            const data = snapshot.val();
-            const msgElement = document.createElement("div");
-            msgElement.className = "message";
-            msgElement.innerHTML = `
-                <div class="msg-header">
-                    <span class="msg-author" onclick="startDM('${data.author}')">${data.author}</span>
-                </div>
-                <div class="msg-text">${data.text}</div>
-            `;
-            messagesDiv.appendChild(msgElement);
-            messagesDiv.scrollTop = messagesDiv.scrollHeight; // Auto-scroll
-        });
-
         // Listen for online users
         const memberListUI = document.getElementById("member-list-ui");
         onValue(ref(db, 'users'), (snapshot) => {
-            // Clear current list (keeping the header)
             memberListUI.innerHTML = '<div style="font-size: 12px; font-weight: bold; margin-bottom: 10px; color: var(--text-muted);">ONLINE</div>';
             snapshot.forEach((childSnapshot) => {
                 const user = childSnapshot.key;
@@ -340,8 +361,43 @@
             });
         });
 
-        // UI Interactions
+        // Start a Private DM
+        window.startDM = function(targetUser) {
+            if (targetUser === myName) return; // Can't DM yourself
+            
+            currentView = "dm";
+            currentDMUser = targetUser;
+            
+            // Update UI for DMs
+            document.getElementById("chat-header").innerText = `@ ${targetUser}`;
+            document.getElementById("input-area").style.display = "block";
+            document.getElementById("rules-content").style.display = "none";
+            document.getElementById("messages").style.display = "flex";
+            document.getElementById("messages").innerHTML = "";
+            document.getElementById("message-input").placeholder = `Message @${targetUser}`;
+            
+            // Switch active highlight on server bar
+            document.getElementById("pub-icon").classList.remove("active-server");
+            document.getElementById("dm-icon").classList.add("active-server");
+
+            // Load DM history
+            const dmPathId = [myName, targetUser].sort().join("_");
+            onChildAdded(ref(db, 'dms/' + dmPathId), (snapshot) => {
+                if (currentView !== "dm" || currentDMUser !== targetUser) return;
+                const data = snapshot.val();
+                appendMessage(data.author, data.text);
+            });
+        }
+
+        // Switch Channels (#general or #rules)
         window.switchChannel = function(channel) {
+            currentView = "public";
+            currentDMUser = "";
+
+            // Switch active highlight on server bar
+            document.getElementById("pub-icon").classList.add("active-server");
+            document.getElementById("dm-icon").classList.remove("active-server");
+
             const msgs = document.getElementById("messages");
             const input = document.getElementById("input-area");
             const rules = document.getElementById("rules-content");
@@ -357,8 +413,14 @@
                 input.style.display = "block";
                 rules.style.display = "none";
                 header.innerText = "# general";
+                loadPublicMessages();
             }
         }
+
+        // Click "PUB" icon to return to public chat
+        document.getElementById("pub-icon").onclick = function() {
+            switchChannel('general');
+        };
 
         window.toggleTheme = function() {
             const body = document.body;
@@ -372,19 +434,12 @@
         window.changeName = function() {
             const newName = prompt("Enter new username:");
             if (newName) {
-                // Remove old name from DB, add new name
                 set(ref(db, 'users/' + myName), null);
                 myName = newName;
                 localStorage.setItem("chatUsername", myName);
                 document.getElementById("display-name").innerText = myName;
                 set(ref(db, 'users/' + myName), { online: true });
             }
-        }
-
-        // Groundwork for DMs
-        window.startDM = function(targetUser) {
-            if (targetUser === myName) return;
-            alert(`DM feature clicked for: ${targetUser}. To implement this fully, we will generate a unique database path based on your two usernames!`);
         }
     </script>
 </body>
