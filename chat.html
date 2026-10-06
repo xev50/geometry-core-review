@@ -348,7 +348,7 @@
             }
         }
 
-        // Listen for online users & dynamically update sidebar based on current view
+        // Listen for online users (Public Server view)
         onValue(ref(db, 'users'), (snapshot) => {
             if (currentView === "public") {
                 const memberListUI = document.getElementById("member-list-ui");
@@ -361,13 +361,30 @@
                     memDiv.onclick = () => startDM(user);
                     memberListUI.appendChild(memDiv);
                 });
+            }
+        });
+
+        // Live listener for DM chats: automatically populates sidebar when messages are sent/received
+        onValue(ref(db, 'dms'), (snapshot) => {
+            if (currentView === "public") return;
+
+            const channelList = document.getElementById("channel-list");
+            channelList.innerHTML = '<div style="font-size: 11px; font-weight: bold; margin-bottom: 8px; color: var(--text-muted); padding: 4px;">DIRECT MESSAGES</div>';
+
+            const dmPartners = new Set();
+            snapshot.forEach((childSnapshot) => {
+                const dmPathId = childSnapshot.key;
+                if (dmPathId.includes(myName)) {
+                    const parts = dmPathId.split("_");
+                    const otherUser = parts[0] === myName ? parts[1] : parts[0];
+                    if (otherUser) dmPartners.add(otherUser);
+                }
+            });
+
+            if (dmPartners.size === 0) {
+                channelList.innerHTML += '<div style="color: var(--text-muted); font-size: 12px; padding: 4px;">No DMs yet. When someone messages you, they will appear here!</div>';
             } else {
-                // Update DM Channel list in sidebar
-                const channelList = document.getElementById("channel-list");
-                channelList.innerHTML = '<div style="font-size: 11px; font-weight: bold; margin-bottom: 8px; color: var(--text-muted); padding: 4px;">DIRECT MESSAGES</div>';
-                snapshot.forEach((childSnapshot) => {
-                    const user = childSnapshot.key;
-                    if (user === myName) return;
+                dmPartners.forEach(user => {
                     const dmDiv = document.createElement("div");
                     dmDiv.className = "channel" + (currentDMUser === user ? " active" : "");
                     dmDiv.innerHTML = `👤 ${user}`;
@@ -392,12 +409,11 @@
             document.getElementById("messages").innerHTML = `
                 <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; color: var(--text-muted); text-align: center;">
                     <h3>Direct Messages</h3>
-                    <p>Select a user from the left sidebar to start chatting privately.</p>
+                    <p>Select a conversation from the left sidebar or receive a message to start chatting.</p>
                 </div>
             `;
             document.getElementById("input-area").style.display = "none";
 
-            // Right panel shows friends/overview
             document.getElementById("member-list-ui").innerHTML = `
                 <div style="font-size: 12px; font-weight: bold; margin-bottom: 10px; color: var(--text-muted);">ACTIVE CHATS</div>
                 <div style="color: var(--text-muted); font-size: 13px; padding: 4px;">Select a user to view profile</div>
@@ -423,7 +439,7 @@
             document.getElementById("messages").innerHTML = "";
             document.getElementById("message-input").placeholder = `Message @${targetUser}`;
 
-            // Right panel shows User Profile Card (Discord Style)
+            // Right panel shows User Profile Card
             document.getElementById("member-list-ui").innerHTML = `
                 <div style="display: flex; flex-direction: column; align-items: center; text-align: center; padding-top: 15px;">
                     <div style="width: 72px; height: 72px; background-color: var(--accent); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 28px; font-weight: bold; color: white; margin-bottom: 10px;">
