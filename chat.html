@@ -93,7 +93,7 @@
             color: var(--text-muted);
             display: flex;
             align-items: center;
-            gap: 5px;
+            gap: 8px;
         }
         .channel:hover, .channel.active {
             background-color: var(--hover);
@@ -171,11 +171,12 @@
             box-sizing: border-box;
         }
 
-        /* Right Member List */
+        /* Right Member/Profile List */
         .member-list {
             width: 240px;
             background-color: var(--bg-sidebar);
             padding: 20px 10px;
+            overflow-y: auto;
         }
         .member {
             padding: 8px;
@@ -198,8 +199,8 @@
 
     <!-- Server Bar -->
     <div class="server-bar">
-        <div class="server-icon active-server" id="pub-icon">PUB</div>
-        <div class="server-icon" id="dm-icon">DMs</div>
+        <div class="server-icon active-server" id="pub-icon" title="Public Server">PUB</div>
+        <div class="server-icon" id="dm-icon" title="Direct Messages">DMs</div>
     </div>
 
     <!-- Sidebar -->
@@ -212,8 +213,8 @@
         <div class="settings-bar">
             <span id="display-name">Loading...</span>
             <div>
-                <button class="settings-btn" onclick="toggleTheme()">🌓</button>
-                <button class="settings-btn" onclick="changeName()">⚙️</button>
+                <button class="settings-btn" onclick="toggleTheme()" title="Toggle Theme">🌓</button>
+                <button class="settings-btn" onclick="changeName()" title="Change Name">⚙️</button>
             </div>
         </div>
     </div>
@@ -240,7 +241,7 @@
         </div>
     </div>
 
-    <!-- Member List -->
+    <!-- Right Panel (Member List or Profile Card) -->
     <div class="member-list" id="member-list-ui">
         <div style="font-size: 12px; font-weight: bold; margin-bottom: 10px; color: var(--text-muted);">ONLINE</div>
         <!-- Members load here -->
@@ -275,8 +276,8 @@
         // Add user to online list
         set(ref(db, 'users/' + myName), { online: true });
 
-        // App States
-        let currentView = "public"; // 'public' or 'dm'
+        // App States: 'public', 'dm-home', 'dm-chat'
+        let currentView = "public"; 
         let currentDMUser = "";
 
         // Moderation Filter
@@ -326,7 +327,7 @@
                 let text = input.value.trim();
                 
                 if (text !== "") {
-                    text = filterMessage(text); // Apply automod
+                    text = filterMessage(text);
                     
                     if (currentView === "public") {
                         push(ref(db, 'messages/general'), {
@@ -334,7 +335,7 @@
                             text: text,
                             timestamp: Date.now()
                         });
-                    } else if (currentView === "dm") {
+                    } else if (currentView === "dm-chat") {
                         const dmPathId = [myName, currentDMUser].sort().join("_");
                         push(ref(db, 'dms/' + dmPathId), {
                             author: myName,
@@ -347,56 +348,119 @@
             }
         }
 
-        // Listen for online users
-        const memberListUI = document.getElementById("member-list-ui");
+        // Listen for online users & dynamically update sidebar based on current view
         onValue(ref(db, 'users'), (snapshot) => {
-            memberListUI.innerHTML = '<div style="font-size: 12px; font-weight: bold; margin-bottom: 10px; color: var(--text-muted);">ONLINE</div>';
-            snapshot.forEach((childSnapshot) => {
-                const user = childSnapshot.key;
-                const memDiv = document.createElement("div");
-                memDiv.className = "member";
-                memDiv.innerText = user;
-                memDiv.onclick = () => startDM(user);
-                memberListUI.appendChild(memDiv);
-            });
+            if (currentView === "public") {
+                const memberListUI = document.getElementById("member-list-ui");
+                memberListUI.innerHTML = '<div style="font-size: 12px; font-weight: bold; margin-bottom: 10px; color: var(--text-muted);">ONLINE</div>';
+                snapshot.forEach((childSnapshot) => {
+                    const user = childSnapshot.key;
+                    const memDiv = document.createElement("div");
+                    memDiv.className = "member";
+                    memDiv.innerText = user;
+                    memDiv.onclick = () => startDM(user);
+                    memberListUI.appendChild(memDiv);
+                });
+            } else {
+                // Update DM Channel list in sidebar
+                const channelList = document.getElementById("channel-list");
+                channelList.innerHTML = '<div style="font-size: 11px; font-weight: bold; margin-bottom: 8px; color: var(--text-muted); padding: 4px;">DIRECT MESSAGES</div>';
+                snapshot.forEach((childSnapshot) => {
+                    const user = childSnapshot.key;
+                    if (user === myName) return;
+                    const dmDiv = document.createElement("div");
+                    dmDiv.className = "channel" + (currentDMUser === user ? " active" : "");
+                    dmDiv.innerHTML = `👤 ${user}`;
+                    dmDiv.onclick = () => startDM(user);
+                    channelList.appendChild(dmDiv);
+                });
+            }
         });
 
-        // Start a Private DM
+        // Switch to DM Home view when clicking DMs icon on left server bar
+        window.switchToDMHome = function() {
+            currentView = "dm-home";
+            currentDMUser = "";
+
+            document.getElementById("pub-icon").classList.remove("active-server");
+            document.getElementById("dm-icon").classList.add("active-server");
+
+            document.getElementById("sidebar-title").innerText = "Direct Messages";
+            document.getElementById("chat-header").innerText = "Direct Messages";
+            document.getElementById("rules-content").style.display = "none";
+            document.getElementById("messages").style.display = "flex";
+            document.getElementById("messages").innerHTML = `
+                <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; color: var(--text-muted); text-align: center;">
+                    <h3>Direct Messages</h3>
+                    <p>Select a user from the left sidebar to start chatting privately.</p>
+                </div>
+            `;
+            document.getElementById("input-area").style.display = "none";
+
+            // Right panel shows friends/overview
+            document.getElementById("member-list-ui").innerHTML = `
+                <div style="font-size: 12px; font-weight: bold; margin-bottom: 10px; color: var(--text-muted);">ACTIVE CHATS</div>
+                <div style="color: var(--text-muted); font-size: 13px; padding: 4px;">Select a user to view profile</div>
+            `;
+        }
+
+        // Start a Private DM with a User
         window.startDM = function(targetUser) {
-            if (targetUser === myName) return; // Can't DM yourself
+            if (targetUser === myName) return;
             
-            currentView = "dm";
+            currentView = "dm-chat";
             currentDMUser = targetUser;
             
-            // Update UI for DMs
+            document.getElementById("pub-icon").classList.remove("active-server");
+            document.getElementById("dm-icon").classList.add("active-server");
+            document.getElementById("sidebar-title").innerText = "Direct Messages";
+
+            // Update UI for DM Chat
             document.getElementById("chat-header").innerText = `@ ${targetUser}`;
             document.getElementById("input-area").style.display = "block";
             document.getElementById("rules-content").style.display = "none";
             document.getElementById("messages").style.display = "flex";
             document.getElementById("messages").innerHTML = "";
             document.getElementById("message-input").placeholder = `Message @${targetUser}`;
-            
-            // Switch active highlight on server bar
-            document.getElementById("pub-icon").classList.remove("active-server");
-            document.getElementById("dm-icon").classList.add("active-server");
 
-            // Load DM history
+            // Right panel shows User Profile Card (Discord Style)
+            document.getElementById("member-list-ui").innerHTML = `
+                <div style="display: flex; flex-direction: column; align-items: center; text-align: center; padding-top: 15px;">
+                    <div style="width: 72px; height: 72px; background-color: var(--accent); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 28px; font-weight: bold; color: white; margin-bottom: 10px;">
+                        ${targetUser.charAt(0).toUpperCase()}
+                    </div>
+                    <div style="font-weight: bold; font-size: 16px; color: var(--text-main);">${targetUser}</div>
+                    <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 20px;">@${targetUser.toLowerCase()}</div>
+                    <div style="width: 100%; background: var(--bg-chat); padding: 10px; border-radius: 8px; text-align: left; font-size: 12px; margin-bottom: 15px;">
+                        <div style="font-weight: bold; margin-bottom: 4px; color: var(--text-muted); font-size: 10px;">ABOUT ME</div>
+                        <div>Encrypted private session between classes.</div>
+                    </div>
+                </div>
+            `;
+
+            // Load DM history from Firebase
             const dmPathId = [myName, targetUser].sort().join("_");
             onChildAdded(ref(db, 'dms/' + dmPathId), (snapshot) => {
-                if (currentView !== "dm" || currentDMUser !== targetUser) return;
+                if (currentView !== "dm-chat" || currentDMUser !== targetUser) return;
                 const data = snapshot.val();
                 appendMessage(data.author, data.text);
             });
         }
 
-        // Switch Channels (#general or #rules)
+        // Switch Channels (#general or #rules) on Public Server
         window.switchChannel = function(channel) {
             currentView = "public";
             currentDMUser = "";
 
-            // Switch active highlight on server bar
             document.getElementById("pub-icon").classList.add("active-server");
             document.getElementById("dm-icon").classList.remove("active-server");
+            document.getElementById("sidebar-title").innerText = "Public Server";
+
+            // Restore public channel list in sidebar
+            document.getElementById("channel-list").innerHTML = `
+                <div class="channel ${channel === 'general' ? 'active' : ''}" onclick="switchChannel('general')"># general</div>
+                <div class="channel ${channel === 'rules' ? 'active' : ''}" onclick="switchChannel('rules')"># rules</div>
+            `;
 
             const msgs = document.getElementById("messages");
             const input = document.getElementById("input-area");
@@ -417,9 +481,12 @@
             }
         }
 
-        // Click "PUB" icon to return to public chat
+        // Attach Event Listeners to Server Icons
         document.getElementById("pub-icon").onclick = function() {
             switchChannel('general');
+        };
+        document.getElementById("dm-icon").onclick = function() {
+            switchToDMHome();
         };
 
         window.toggleTheme = function() {
