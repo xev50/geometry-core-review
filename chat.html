@@ -52,62 +52,57 @@
             align-items: center;
         }
         
-        /* Solid Grey Background just for the login screen */
-        #login-overlay {
-            background-color: #808080; 
-        }
+        #login-overlay { background-color: #808080; }
 
         .modal-box {
-            background-color: var(--bg-chat);
-            padding: 30px;
-            border-radius: 8px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-            width: 320px;
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
+            background-color: var(--bg-chat); padding: 30px; border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3); width: 320px;
+            display: flex; flex-direction: column; gap: 15px;
         }
         .modal-box h2, .modal-box h3 { margin-top: 0; }
         .modal-box input, .modal-box select {
-            width: 100%;
-            padding: 10px;
-            background-color: var(--bg-sidebar);
-            border: 1px solid var(--bg-server);
-            color: var(--text-main);
-            border-radius: 4px;
-            box-sizing: border-box;
-            outline: none;
+            width: 100%; padding: 10px; background-color: var(--bg-sidebar);
+            border: 1px solid var(--bg-server); color: var(--text-main);
+            border-radius: 4px; box-sizing: border-box; outline: none;
         }
-        .btn-primary {
-            background-color: var(--accent);
-            color: white; border: none; padding: 10px; border-radius: 4px; cursor: pointer; font-weight: bold; transition: 0.2s;
-        }
+        .btn-primary { background-color: var(--accent); color: white; border: none; padding: 10px; border-radius: 4px; cursor: pointer; font-weight: bold; transition: 0.2s; }
         .btn-primary:hover { background-color: #4752c4; }
-        
         .btn-success { background-color: var(--success); color: white; border: none; padding: 10px; border-radius: 4px; cursor: pointer; font-weight: bold; }
         .btn-danger { background-color: var(--error); color: white; border: none; padding: 10px; border-radius: 4px; cursor: pointer; font-weight: bold; }
 
-        /* Call Notification specific */
+        /* Call Notification */
         #call-notification { display: none; }
         .call-buttons { display: flex; gap: 10px; justify-content: space-between; }
         .call-buttons button { flex: 1; }
-
-        /* Settings Modal specific */
         #settings-modal { display: none; }
         .settings-group { display: flex; flex-direction: column; gap: 5px; }
         .settings-group label { font-size: 12px; font-weight: bold; color: var(--text-muted); text-transform: uppercase; }
         .close-btn { background: none; border: none; color: var(--text-muted); cursor: pointer; align-self: flex-end; font-size: 18px; }
 
+        /* Badges */
+        .server-badge {
+            background-color: var(--error); color: white; border-radius: 50%;
+            padding: 2px 6px; font-size: 10px; position: absolute;
+            top: -5px; right: -5px; display: none; font-weight: bold;
+            box-shadow: 0 0 5px rgba(0,0,0,0.5);
+        }
+        .channel-badge {
+            background-color: var(--error); color: white; border-radius: 10px;
+            padding: 2px 6px; font-size: 10px; font-weight: bold;
+        }
+
         /* General Layout */
         .server-bar { width: 72px; background-color: var(--bg-server); display: flex; flex-direction: column; align-items: center; padding-top: 12px; gap: 10px; }
-        .server-icon { width: 48px; height: 48px; background-color: var(--bg-chat); border-radius: 50%; display: flex; justify-content: center; align-items: center; cursor: pointer; transition: 0.2s; font-weight: bold; }
+        .server-icon { position: relative; width: 48px; height: 48px; background-color: var(--bg-chat); border-radius: 50%; display: flex; justify-content: center; align-items: center; cursor: pointer; transition: 0.2s; font-weight: bold; }
         .server-icon:hover, .active-server { border-radius: 16px; background-color: var(--accent); color: white; }
 
         .sidebar { width: 240px; background-color: var(--bg-sidebar); display: flex; flex-direction: column; }
         .sidebar-header { padding: 16px; font-weight: bold; box-shadow: 0 1px 2px rgba(0,0,0,0.2); }
         .channel-list { padding: 10px; flex-grow: 1; overflow-y: auto; }
-        .channel { padding: 8px; margin-bottom: 2px; cursor: pointer; border-radius: 4px; color: var(--text-muted); display: flex; align-items: center; gap: 8px; }
+        .channel { padding: 8px; margin-bottom: 2px; cursor: pointer; border-radius: 4px; color: var(--text-muted); display: flex; align-items: center; justify-content: space-between; }
+        .channel-left { display: flex; align-items: center; gap: 8px; }
         .channel:hover, .channel.active { background-color: var(--hover); color: var(--text-main); }
+        
         .settings-bar { padding: 10px; background-color: var(--bg-server); display: flex; justify-content: space-between; align-items: center; }
         .settings-btn { background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 18px; transition: 0.2s;}
         .settings-btn:hover { color: var(--text-main); }
@@ -131,6 +126,7 @@
         .input-area { padding: 20px; display: flex; gap: 10px; align-items: center; }
         .chat-input { flex-grow: 1; background-color: var(--bg-sidebar); border: none; color: var(--text-main); padding: 15px; border-radius: 8px; outline: none; }
         .upload-btn { background-color: var(--bg-sidebar); color: var(--text-muted); border: none; width: 48px; height: 48px; border-radius: 8px; cursor: pointer; font-size: 20px; }
+        
         .member-list { width: 240px; background-color: var(--bg-sidebar); padding: 20px 10px; overflow-y: auto; }
         .member { padding: 8px; color: var(--text-muted); cursor: pointer; border-radius: 4px; }
         .member:hover { background-color: var(--hover); color: var(--text-main); }
@@ -172,43 +168,26 @@
                 <h2>User Settings</h2>
                 <button class="close-btn" onclick="document.getElementById('settings-modal').style.display='none'">✖</button>
             </div>
-            
-            <div class="settings-group">
-                <label>Change Username</label>
-                <input type="text" id="setting-name">
-            </div>
-
+            <div class="settings-group"><label>Change Username</label><input type="text" id="setting-name"></div>
             <div class="settings-group">
                 <label>Theme</label>
-                <select id="setting-theme">
-                    <option value="dark">Dark Mode</option>
-                    <option value="light">Light Mode</option>
-                </select>
+                <select id="setting-theme"><option value="dark">Dark Mode</option><option value="light">Light Mode</option></select>
             </div>
-
-            <div class="settings-group">
-                <label>Call Volume</label>
-                <input type="range" id="setting-volume" min="0" max="1" step="0.05" value="1" oninput="updateVolume()">
-            </div>
-
-            <div class="settings-group">
-                <label>Microphone (Input)</label>
-                <select id="setting-mic"></select>
-            </div>
-
-            <div class="settings-group">
-                <label>Headphones (Output)</label>
-                <select id="setting-speaker"></select>
-            </div>
-
+            <div class="settings-group"><label>Call Volume</label><input type="range" id="setting-volume" min="0" max="1" step="0.05" value="1" oninput="updateVolume()"></div>
+            <div class="settings-group"><label>Microphone (Input)</label><select id="setting-mic"></select></div>
+            <div class="settings-group"><label>Headphones (Output)</label><select id="setting-speaker"></select></div>
             <button class="btn-primary" style="margin-top: 10px;" onclick="saveSettings()">Save Changes</button>
         </div>
     </div>
 
     <!-- Main Layout -->
     <div class="server-bar">
-        <div class="server-icon active-server" id="pub-icon" title="Public Server">PUB</div>
-        <div class="server-icon" id="dm-icon" title="Direct Messages">DMs</div>
+        <div class="server-icon active-server" id="pub-icon" title="Public Server" onclick="switchChannel('general')">
+            PUB<div class="server-badge" id="pub-badge">0</div>
+        </div>
+        <div class="server-icon" id="dm-icon" title="Direct Messages" onclick="switchToDMHome()">
+            DMs<div class="server-badge" id="dm-badge">0</div>
+        </div>
     </div>
 
     <div class="sidebar">
@@ -272,33 +251,87 @@
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
-        // Global State
+        // --- AUDIO SYNTHESIZER ENGINE ---
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        const audioCtx = new AudioContext();
+
+        function playTone(freq, type, duration, vol, startTime) {
+            if (audioCtx.state === 'suspended') return; // Must be resumed via user click first
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = type;
+            osc.frequency.value = freq;
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            gain.gain.setValueAtTime(vol, audioCtx.currentTime + startTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + startTime + duration);
+            osc.start(audioCtx.currentTime + startTime);
+            osc.stop(audioCtx.currentTime + startTime + duration);
+        }
+
+        // Sound Effects
+        function playPing() { playTone(800, 'sine', 0.15, 0.2, 0); playTone(1200, 'sine', 0.25, 0.2, 0.1); }
+        function playJoin() { playTone(400, 'square', 0.1, 0.05, 0); playTone(600, 'square', 0.1, 0.05, 0.1); playTone(800, 'square', 0.2, 0.05, 0.2); }
+        function playLeave() { playTone(800, 'square', 0.1, 0.05, 0); playTone(600, 'square', 0.1, 0.05, 0.1); playTone(400, 'square', 0.2, 0.05, 0.2); }
+        
+        let ringInterval;
+        function startRinging() {
+            if(ringInterval) return;
+            const ring = () => { playTone(500, 'sine', 0.4, 0.1, 0); playTone(500, 'sine', 0.4, 0.1, 0.5); };
+            ring(); // play instantly
+            ringInterval = setInterval(ring, 2000); // repeat every 2s
+        }
+        function stopRinging() { clearInterval(ringInterval); ringInterval = null; }
+
+        // --- GLOBAL STATE ---
         let myName = "";
         let currentServer = "public"; 
         let currentChannel = "general"; 
-        let onlineUsersSnapshot = null;
-        let dmsSnapshot = null;
-        let currentMessageUnsubscribe = null;
         
-        // PeerJS & Hardware Settings
+        // Presence & Data
+        let onlineUsersSnapshot = null;
+        let globalGeneralSnapshot = null;
+        let globalDMSnapshot = null;
+
+        // Notification Badges State
+        let knownMessageCounts = { general: -1, dms: {} };
+        let unreadCounts = { general: 0, dms: {} };
+        
+        // Hardware & Call Variables
         let peer = null;
         let activeCall = null;
         let localStream = null;
         let incomingCallObj = null;
-        
         let selectedMicId = 'default';
         let selectedSpeakerId = 'default';
 
+        // --- NOTIFICATION ENGINE ---
+        function updateBadges() {
+            const pubBadge = document.getElementById("pub-badge");
+            if(unreadCounts.general > 0) { pubBadge.style.display = 'block'; pubBadge.innerText = unreadCounts.general; }
+            else { pubBadge.style.display = 'none'; }
+
+            const dmBadge = document.getElementById("dm-badge");
+            let dmTotal = 0;
+            for (let u in unreadCounts.dms) dmTotal += unreadCounts.dms[u];
+            if(dmTotal > 0) { dmBadge.style.display = 'block'; dmBadge.innerText = dmTotal; }
+            else { dmBadge.style.display = 'none'; }
+            
+            // Re-render sidebars to show specific channel counts
+            if (currentServer === "public") renderPublicSidebar();
+            if (currentServer === "dm") renderDMSidebar();
+        }
+
+
         // --- LOGIN SYSTEM ---
         window.attemptLogin = function() {
+            if (audioCtx.state === 'suspended') audioCtx.resume(); // Unlock audio on user click
+            
             const user = document.getElementById("login-username").value.trim();
             const pass = document.getElementById("login-password").value.trim();
             const errorDiv = document.getElementById("login-error");
             
-            if (!user || !pass) {
-                errorDiv.innerText = "Please enter both fields.";
-                errorDiv.style.display = "block"; return;
-            }
+            if (!user || !pass) { errorDiv.innerText = "Please enter both fields."; errorDiv.style.display = "block"; return; }
 
             get(child(ref(db), `auth/${user}`)).then((snapshot) => {
                 if (snapshot.exists()) {
@@ -308,32 +341,25 @@
                     set(ref(db, `auth/${user}`), { password: pass });
                     finalizeLogin(user, pass);
                 }
-            }).catch(() => {
-                errorDiv.innerText = "Database error connecting.";
-                errorDiv.style.display = "block";
-            });
+            }).catch(() => { errorDiv.innerText = "Database error connecting."; errorDiv.style.display = "block"; });
         }
 
         function finalizeLogin(username, password) {
             myName = username;
-            localStorage.setItem("chatUsername", myName);
-            localStorage.setItem("chatPassword", password);
-            
+            localStorage.setItem("chatUsername", myName); localStorage.setItem("chatPassword", password);
             document.getElementById("login-overlay").style.display = "none";
             document.getElementById("display-name").innerText = myName;
             
             set(ref(db, 'users/' + myName), { online: true });
             
             setupVoiceCalling();
-            loadPublicMessages();
-            startPresenceListeners();
-            switchChannel('general');
+            startGlobalListeners(); // Starts retrieving all data in background
+            window.switchChannel('general');
         }
 
         window.logout = function() {
             if(myName) set(ref(db, 'users/' + myName), null);
-            localStorage.removeItem("chatUsername");
-            localStorage.removeItem("chatPassword");
+            localStorage.removeItem("chatUsername"); localStorage.removeItem("chatPassword");
             location.reload();
         }
 
@@ -346,7 +372,6 @@
             try {
                 const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
                 stream.getTracks().forEach(t => t.stop());
-                
                 const devices = await navigator.mediaDevices.enumerateDevices();
                 const micSelect = document.getElementById('setting-mic');
                 const speakerSelect = document.getElementById('setting-speaker');
@@ -355,21 +380,15 @@
                 speakerSelect.innerHTML = '<option value="default">System Default</option>';
 
                 devices.forEach(device => {
-                    if (device.kind === 'audioinput' && device.deviceId !== 'default') {
+                    if (device.kind === 'audioinput' && device.deviceId !== 'default') 
                         micSelect.innerHTML += `<option value="${device.deviceId}" ${selectedMicId === device.deviceId ? 'selected' : ''}>${device.label || 'Microphone ' + device.deviceId}</option>`;
-                    }
-                    if (device.kind === 'audiooutput' && device.deviceId !== 'default') {
+                    if (device.kind === 'audiooutput' && device.deviceId !== 'default') 
                         speakerSelect.innerHTML += `<option value="${device.deviceId}" ${selectedSpeakerId === device.deviceId ? 'selected' : ''}>${device.label || 'Speaker ' + device.deviceId}</option>`;
-                    }
                 });
-            } catch (err) {
-                console.error("Mic permissions denied for reading list", err);
-            }
+            } catch (err) {}
         }
 
-        window.updateVolume = function() {
-            document.getElementById('remote-audio').volume = document.getElementById('setting-volume').value;
-        }
+        window.updateVolume = function() { document.getElementById('remote-audio').volume = document.getElementById('setting-volume').value; }
 
         window.saveSettings = async function() {
             const theme = document.getElementById('setting-theme').value;
@@ -378,7 +397,6 @@
 
             selectedMicId = document.getElementById('setting-mic').value;
             selectedSpeakerId = document.getElementById('setting-speaker').value;
-            
             const audioEl = document.getElementById('remote-audio');
             if (typeof audioEl.setSinkId !== 'undefined' && selectedSpeakerId !== 'default') {
                 audioEl.setSinkId(selectedSpeakerId).catch(e => console.error("Could not set speaker routing", e));
@@ -388,21 +406,12 @@
             if (newName && newName !== myName) {
                 const pass = localStorage.getItem("chatPassword");
                 get(child(ref(db), `auth/${newName}`)).then((snapshot) => {
-                    if (snapshot.exists()) {
-                        alert("That username is already taken!");
-                    } else {
-                        set(ref(db, `auth/${newName}`), { password: pass });
-                        set(ref(db, `users/${newName}`), { online: true });
-                        
-                        remove(ref(db, `auth/${myName}`));
-                        remove(ref(db, `users/${myName}`));
-                        
-                        myName = newName;
-                        localStorage.setItem("chatUsername", myName);
-                        document.getElementById("display-name").innerText = myName;
-                        
-                        if (peer) peer.destroy();
-                        setupVoiceCalling();
+                    if (snapshot.exists()) { alert("That username is already taken!"); } 
+                    else {
+                        set(ref(db, `auth/${newName}`), { password: pass }); set(ref(db, `users/${newName}`), { online: true });
+                        remove(ref(db, `auth/${myName}`)); remove(ref(db, `users/${myName}`));
+                        myName = newName; localStorage.setItem("chatUsername", myName); document.getElementById("display-name").innerText = myName;
+                        if (peer) peer.destroy(); setupVoiceCalling();
                     }
                 });
             }
@@ -412,69 +421,60 @@
         // --- VOICE CALLING SYSTEM ---
         function setupVoiceCalling() {
             peer = new Peer(myName);
-
             peer.on('call', (call) => {
                 incomingCallObj = call;
                 document.getElementById('caller-name').innerText = call.peer;
                 document.getElementById('call-notification').style.display = 'flex';
+                startRinging(); // Play ringtone
             });
         }
 
         async function getCustomMediaStream() {
-            const constraints = {
-                audio: selectedMicId === 'default' ? true : { deviceId: { exact: selectedMicId } },
-                video: false
-            };
+            const constraints = { audio: selectedMicId === 'default' ? true : { deviceId: { exact: selectedMicId } }, video: false };
             return await navigator.mediaDevices.getUserMedia(constraints);
         }
 
         window.acceptCall = async function() {
             document.getElementById('call-notification').style.display = 'none';
+            stopRinging(); playJoin(); // Play join sound
             if(!incomingCallObj) return;
 
             try {
                 localStream = await getCustomMediaStream();
                 incomingCallObj.answer(localStream);
-                
-                incomingCallObj.on('stream', (remoteStream) => {
-                    document.getElementById('remote-audio').srcObject = remoteStream;
-                });
-                
-                activeCall = incomingCallObj;
-                showActiveCallUI();
-                
+                incomingCallObj.on('stream', (remoteStream) => { document.getElementById('remote-audio').srcObject = remoteStream; });
+                activeCall = incomingCallObj; showActiveCallUI();
                 incomingCallObj.on('close', resetCallUI);
             } catch(e) { alert("Failed to access microphone."); }
         }
 
         window.declineCall = function() {
             document.getElementById('call-notification').style.display = 'none';
+            stopRinging(); playLeave();
             if(incomingCallObj) incomingCallObj.close();
             incomingCallObj = null;
         }
 
         window.initiateCall = async function() {
             if (currentServer !== "dm" || !currentChannel) return;
-            const targetUser = currentChannel;
-            
             try {
                 localStream = await getCustomMediaStream();
-                const call = peer.call(targetUser, localStream);
+                const call = peer.call(currentChannel, localStream);
                 
                 call.on('stream', (remoteStream) => {
+                    playJoin(); // Play join sound when they answer
                     document.getElementById('remote-audio').srcObject = remoteStream;
                 });
                 
                 call.on('close', resetCallUI);
-                activeCall = call;
-                showActiveCallUI();
-                
+                activeCall = call; showActiveCallUI();
             } catch(err) { alert("Failed to access microphone."); }
         }
 
         window.endCall = function() {
             if (activeCall) activeCall.close();
             if (localStream) localStream.getTracks().forEach(track => track.stop());
+            playLeave(); // Play leave sound
             resetCallUI();
         }
 
@@ -487,119 +487,116 @@
             activeCall = null;
             if (localStream) localStream.getTracks().forEach(track => track.stop());
             document.getElementById('remote-audio').srcObject = null;
-            
             if (currentServer === "dm" && currentChannel !== "") {
                 document.getElementById('start-call-btn').style.display = 'block';
                 document.getElementById('end-call-btn').style.display = 'none';
             }
         }
 
-        // --- MODERATION ---
-        const blocklist = ["slur1", "slur2", "nsfwword1", "nsfwword2"];
-        window.filterMessage = function(text) {
-            let filtered = text;
-            blocklist.forEach(word => {
-                const regex = new RegExp(`\\b${word}\\b`, "gi");
-                filtered = filtered.replace(regex, "***");
+        // --- GLOBAL LISTENERS (Background Processes) ---
+        function startGlobalListeners() {
+            onValue(ref(db, 'users'), (snapshot) => {
+                onlineUsersSnapshot = snapshot;
+                if (currentServer === "public") renderPublicSidebar(); else renderDMSidebar();
             });
-            return filtered;
-        }
 
-        // --- CHAT LOGIC ---
-        function clearMessageListener() {
-            if (currentMessageUnsubscribe) { currentMessageUnsubscribe(); currentMessageUnsubscribe = null; }
-        }
+            onValue(ref(db, 'messages/general'), (snapshot) => {
+                globalGeneralSnapshot = snapshot;
+                const dataCount = snapshot.val() ? Object.keys(snapshot.val()).length : 0;
+                
+                if (knownMessageCounts.general !== -1 && dataCount > knownMessageCounts.general) {
+                    if (currentServer !== "public" || currentChannel !== "general") {
+                        unreadCounts.general += (dataCount - knownMessageCounts.general);
+                        updateBadges();
+                    }
+                }
+                knownMessageCounts.general = dataCount;
 
-        function loadPublicMessages() {
-            if (currentServer !== "public" || currentChannel !== "general") return;
-            clearMessageListener();
-            const messagesDiv = document.getElementById("messages");
-            
-            currentMessageUnsubscribe = onValue(ref(db, 'messages/general'), (snapshot) => {
-                if (currentServer !== "public" || currentChannel !== "general") return;
-                messagesDiv.innerHTML = "";
-                snapshot.forEach((childSnapshot) => {
-                    const data = childSnapshot.val();
-                    appendMessage(data.author, data.text, data.imageUrl, childSnapshot.key, 'general');
+                if (currentServer === "public" && currentChannel === "general") renderMessages(snapshot, 'general');
+            });
+
+            onValue(ref(db, 'dms'), (snapshot) => {
+                globalDMSnapshot = snapshot;
+                snapshot.forEach(dmSnap => {
+                    const pathId = dmSnap.key;
+                    if(pathId.includes(myName)) {
+                        const parts = pathId.split("_"); 
+                        const otherUser = parts[0] === myName ? parts[1] : parts[0];
+                        const msgCount = dmSnap.val() ? Object.keys(dmSnap.val()).length : 0;
+                        
+                        if(knownMessageCounts.dms[otherUser] !== undefined) {
+                            if(msgCount > knownMessageCounts.dms[otherUser]) {
+                                if (currentServer !== 'dm' || currentChannel !== otherUser) {
+                                    unreadCounts.dms[otherUser] = (unreadCounts.dms[otherUser] || 0) + (msgCount - knownMessageCounts.dms[otherUser]);
+                                    playPing(); // Ping sound for DMs in background
+                                    updateBadges();
+                                }
+                            }
+                        } else { unreadCounts.dms[otherUser] = 0; } // First load
+                        knownMessageCounts.dms[otherUser] = msgCount;
+                    }
                 });
-                messagesDiv.scrollTop = messagesDiv.scrollHeight;
+
+                if (currentServer === "dm") {
+                    renderDMSidebar();
+                    if (currentChannel !== "") {
+                        const dmPathId = [myName, currentChannel].sort().join("_");
+                        renderMessages(snapshot.child(dmPathId), 'dm', dmPathId);
+                    }
+                }
             });
+        }
+
+        // --- RENDER FUNCTIONS ---
+        function renderMessages(snapshot, chatType, pathId) {
+            const messagesDiv = document.getElementById("messages");
+            messagesDiv.innerHTML = "";
+            snapshot.forEach((childSnapshot) => {
+                const data = childSnapshot.val();
+                appendMessage(data.author, data.text, data.imageUrl, childSnapshot.key, chatType, pathId);
+            });
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
         }
 
         function appendMessage(author, text, imageUrl, messageKey, chatType, pathId) {
             const messagesDiv = document.getElementById("messages");
-            const msgElement = document.createElement("div");
-            msgElement.className = "message";
+            const msgElement = document.createElement("div"); msgElement.className = "message";
             
             let contentHTML = '';
             if (text) contentHTML += `<div class="msg-text">${text}</div>`;
             if (imageUrl) contentHTML += `<div><img src="${imageUrl}" class="msg-image" onclick="window.open('${imageUrl}', '_blank')"></div>`;
 
-            msgElement.innerHTML = `<div class="msg-header"><span class="msg-author" onclick="startDM('${author}')">${author}</span></div>${contentHTML}`;
+            msgElement.innerHTML = `<div class="msg-header"><span class="msg-author" onclick="window.startDM('${author}')">${author}</span></div>${contentHTML}`;
 
             msgElement.oncontextmenu = function(e) {
                 e.preventDefault();
-                if (author === myName) {
-                    if (confirm("Unsend this message?")) {
-                        if (chatType === 'general') remove(ref(db, 'messages/general/' + messageKey));
-                        else remove(ref(db, 'dms/' + pathId + '/' + messageKey));
-                    }
-                } else alert("You can only unsend your own messages.");
+                if (author === myName && confirm("Unsend this message?")) {
+                    if (chatType === 'general') remove(ref(db, 'messages/general/' + messageKey));
+                    else remove(ref(db, 'dms/' + pathId + '/' + messageKey));
+                }
             };
             messagesDiv.appendChild(msgElement);
         }
 
-        window.handleKeyPress = function(e) {
-            if (e.key === 'Enter') {
-                const input = document.getElementById("message-input");
-                let text = input.value.trim();
-                if (text !== "") { sendMessageData(filterMessage(text), null); input.value = ""; }
-            }
-        }
-
-        window.handleImageUpload = function(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-            const reader = new FileReader();
-            reader.onload = function(e) { sendMessageData("", e.target.result); };
-            reader.readAsDataURL(file);
-            event.target.value = "";
-        }
-
-        function sendMessageData(text, imageUrl) {
-            if (currentServer === "public" && currentChannel === "general") {
-                push(ref(db, 'messages/general'), { author: myName, text: text, imageUrl: imageUrl || "", timestamp: Date.now() });
-            } else if (currentServer === "dm" && currentChannel !== "") {
-                const dmPathId = [myName, currentChannel].sort().join("_");
-                push(ref(db, 'dms/' + dmPathId), { author: myName, text: text, imageUrl: imageUrl || "", timestamp: Date.now() });
-            }
-        }
-
-        // --- SIDEBAR RENDERING ---
-        function startPresenceListeners() {
-            onValue(ref(db, 'users'), (snapshot) => {
-                onlineUsersSnapshot = snapshot;
-                if (currentServer === "public") renderPublicSidebar();
-                else renderDMSidebar();
-            });
-            onValue(ref(db, 'dms'), (snapshot) => {
-                dmsSnapshot = snapshot;
-                if (currentServer === "dm") renderDMSidebar();
-            });
-        }
-
         function renderPublicSidebar() {
             document.getElementById("sidebar-title").innerText = "Public Server";
+            
+            let genBadge = unreadCounts.general > 0 ? `<div class="channel-badge" style="display:block;">${unreadCounts.general}</div>` : '';
+            
             document.getElementById("channel-list").innerHTML = `
-                <div class="channel ${currentChannel === 'general' ? 'active' : ''}" onclick="switchChannel('general')"># general</div>
-                <div class="channel ${currentChannel === 'rules' ? 'active' : ''}" onclick="switchChannel('rules')"># rules</div>
+                <div class="channel ${currentChannel === 'general' ? 'active' : ''}" onclick="window.switchChannel('general')">
+                    <div class="channel-left"># general</div> ${genBadge}
+                </div>
+                <div class="channel ${currentChannel === 'rules' ? 'active' : ''}" onclick="window.switchChannel('rules')">
+                    <div class="channel-left"># rules</div>
+                </div>
             `;
             const memberListUI = document.getElementById("member-list-ui");
             memberListUI.innerHTML = '<div style="font-size: 12px; font-weight: bold; margin-bottom: 10px; color: var(--text-muted);">ONLINE</div>';
             if (onlineUsersSnapshot) {
                 onlineUsersSnapshot.forEach(child => {
                     const memDiv = document.createElement("div");
-                    memDiv.className = "member"; memDiv.innerText = child.key; memDiv.onclick = () => startDM(child.key);
+                    memDiv.className = "member"; memDiv.innerText = child.key; memDiv.onclick = () => window.startDM(child.key);
                     memberListUI.appendChild(memDiv);
                 });
             }
@@ -612,7 +609,7 @@
 
             const contacts = new Set();
             if (onlineUsersSnapshot) onlineUsersSnapshot.forEach(child => { if (child.key !== myName) contacts.add(child.key); });
-            if (dmsSnapshot) dmsSnapshot.forEach(child => {
+            if (globalDMSnapshot) globalDMSnapshot.forEach(child => {
                 if (child.key.includes(myName)) {
                     const parts = child.key.split("_"); const other = parts[0] === myName ? parts[1] : parts[0];
                     if (other && other !== myName) contacts.add(other);
@@ -623,34 +620,39 @@
             else contacts.forEach(user => {
                 const dmDiv = document.createElement("div");
                 dmDiv.className = "channel" + (currentChannel === user ? " active" : "");
-                dmDiv.innerHTML = `👤 ${user}`; dmDiv.onclick = () => startDM(user);
+                let uBadge = (unreadCounts.dms[user] > 0) ? `<div class="channel-badge" style="display:block;">${unreadCounts.dms[user]}</div>` : '';
+                dmDiv.innerHTML = `<div class="channel-left">👤 ${user}</div> ${uBadge}`;
+                dmDiv.onclick = () => window.startDM(user);
                 channelList.appendChild(dmDiv);
             });
         }
 
+        // --- NAVIGATION INTERACTION ---
         window.switchChannel = function(channel) {
             currentServer = "public"; currentChannel = channel;
+            
+            if (channel === 'general') { unreadCounts.general = 0; updateBadges(); }
+            
             document.getElementById("pub-icon").classList.add("active-server");
             document.getElementById("dm-icon").classList.remove("active-server");
             document.getElementById("call-controls").style.display = "none";
-
             renderPublicSidebar();
 
             const msgs = document.getElementById("messages"), inputArea = document.getElementById("input-area"), rules = document.getElementById("rules-content"), header = document.getElementById("chat-header-text");
 
             if (channel === 'rules') {
-                clearMessageListener(); msgs.style.display = "none"; inputArea.style.display = "none"; rules.style.display = "block"; header.innerText = "# rules";
+                msgs.style.display = "none"; inputArea.style.display = "none"; rules.style.display = "block"; header.innerText = "# rules";
             } else {
-                msgs.style.display = "flex"; inputArea.style.display = "flex"; rules.style.display = "none"; header.innerText = "# general"; loadPublicMessages();
+                msgs.style.display = "flex"; inputArea.style.display = "flex"; rules.style.display = "none"; header.innerText = "# general";
+                if (globalGeneralSnapshot) renderMessages(globalGeneralSnapshot, 'general');
             }
         }
 
         window.switchToDMHome = function() {
-            currentServer = "dm"; currentChannel = ""; clearMessageListener();
+            currentServer = "dm"; currentChannel = "";
             document.getElementById("pub-icon").classList.remove("active-server");
             document.getElementById("dm-icon").classList.add("active-server");
             document.getElementById("call-controls").style.display = "none";
-
             renderDMSidebar();
 
             document.getElementById("chat-header-text").innerText = "Direct Messages";
@@ -663,26 +665,22 @@
 
         window.startDM = function(targetUser) {
             if (targetUser === myName) return;
-            currentServer = "dm"; currentChannel = targetUser; clearMessageListener();
+            currentServer = "dm"; currentChannel = targetUser;
+            
+            unreadCounts.dms[targetUser] = 0; updateBadges();
 
             document.getElementById("pub-icon").classList.remove("active-server");
             document.getElementById("dm-icon").classList.add("active-server");
-            
             document.getElementById("call-controls").style.display = "flex";
-            if (!activeCall) {
-                document.getElementById('start-call-btn').style.display = 'block';
-                document.getElementById('end-call-btn').style.display = 'none';
-            }
-
+            if (!activeCall) { document.getElementById('start-call-btn').style.display = 'block'; document.getElementById('end-call-btn').style.display = 'none'; }
+            
             renderDMSidebar();
 
             document.getElementById("chat-header-text").innerText = `@ ${targetUser}`;
             document.getElementById("input-area").style.display = "flex";
             document.getElementById("rules-content").style.display = "none";
             document.getElementById("messages").style.display = "flex";
-            document.getElementById("messages").innerHTML = "";
             document.getElementById("message-input").placeholder = `Message @${targetUser}`;
-
             document.getElementById("member-list-ui").innerHTML = `
                 <div style="display: flex; flex-direction: column; align-items: center; text-align: center; padding-top: 15px;">
                     <div style="width: 72px; height: 72px; background-color: var(--accent); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 28px; font-weight: bold; color: white; margin-bottom: 10px;">${targetUser.charAt(0).toUpperCase()}</div>
@@ -690,33 +688,56 @@
                 </div>
             `;
 
-            const dmPathId = [myName, targetUser].sort().join("_");
-            currentMessageUnsubscribe = onValue(ref(db, 'dms/' + dmPathId), (snapshot) => {
-                if (currentServer !== "dm" || currentChannel !== targetUser) return;
-                const messagesDiv = document.getElementById("messages");
-                messagesDiv.innerHTML = "";
-                snapshot.forEach((childSnapshot) => {
-                    const data = childSnapshot.val();
-                    appendMessage(data.author, data.text, data.imageUrl, childSnapshot.key, 'dm', dmPathId);
-                });
-                messagesDiv.scrollTop = messagesDiv.scrollHeight;
-            });
+            if (globalDMSnapshot) {
+                const dmPathId = [myName, targetUser].sort().join("_");
+                renderMessages(globalDMSnapshot.child(dmPathId), 'dm', dmPathId);
+            }
         }
 
-        // AUTO-LOGIN LOGIC MOVED TO THE BOTTOM
-        // This ensures all functions above are loaded into the browser memory before it tries to run them.
+        // --- MESSAGE INPUT ---
+        const blocklist = ["slur1", "slur2", "nsfwword1", "nsfwword2"];
+        window.filterMessage = function(text) {
+            let filtered = text;
+            blocklist.forEach(word => { const regex = new RegExp(`\\b${word}\\b`, "gi"); filtered = filtered.replace(regex, "***"); });
+            return filtered;
+        }
+
+        window.handleKeyPress = function(e) {
+            if (e.key === 'Enter') {
+                const input = document.getElementById("message-input"); let text = input.value.trim();
+                if (text !== "") { sendMessageData(filterMessage(text), null); input.value = ""; }
+            }
+        }
+
+        window.handleImageUpload = function(event) {
+            const file = event.target.files[0]; if (!file) return;
+            const reader = new FileReader(); reader.onload = function(e) { sendMessageData("", e.target.result); };
+            reader.readAsDataURL(file); event.target.value = "";
+        }
+
+        function sendMessageData(text, imageUrl) {
+            if (currentServer === "public" && currentChannel === "general") {
+                push(ref(db, 'messages/general'), { author: myName, text: text, imageUrl: imageUrl || "", timestamp: Date.now() });
+            } else if (currentServer === "dm" && currentChannel !== "") {
+                const dmPathId = [myName, currentChannel].sort().join("_");
+                push(ref(db, 'dms/' + dmPathId), { author: myName, text: text, imageUrl: imageUrl || "", timestamp: Date.now() });
+            }
+        }
+
+        // --- INIT ---
         const savedName = localStorage.getItem("chatUsername");
         const savedPass = localStorage.getItem("chatPassword");
         const savedTheme = localStorage.getItem("chatTheme");
-        
         if (savedTheme === "light") document.body.setAttribute("data-theme", "light");
-
+        
+        // Only auto login if we have creds. Using a small timeout to let DOM setup
         if (savedName && savedPass) {
-            document.getElementById("login-username").value = savedName;
-            document.getElementById("login-password").value = savedPass;
-            window.attemptLogin(); 
+            setTimeout(() => {
+                document.getElementById("login-username").value = savedName;
+                document.getElementById("login-password").value = savedPass;
+                window.attemptLogin(); 
+            }, 100);
         }
-
     </script>
 </body>
 </html>
