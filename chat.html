@@ -140,6 +140,12 @@
         .message {
             display: flex;
             flex-direction: column;
+            padding: 4px 8px;
+            border-radius: 4px;
+            user-select: none;
+        }
+        .message:hover {
+            background-color: rgba(0, 0, 0, 0.05);
         }
         .msg-header {
             display: flex;
@@ -281,7 +287,7 @@
     <!-- Firebase SDK Setup -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getDatabase, ref, push, onChildAdded, set, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+        import { getDatabase, ref, push, set, onValue, remove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyDegqgPPUUXHnfe3ZcZ8K8BG4t-RUEVlUQ",
@@ -311,6 +317,7 @@
         let currentChannel = "general"; 
         let onlineUsersSnapshot = null;
         let dmsSnapshot = null;
+        let currentMessageUnsubscribe = null; // Tracks active chat listener to prevent duplication
 
         // Moderation Filter
         const blocklist = ["slur1", "slur2", "nsfwword1", "nsfwword2"];
@@ -324,21 +331,32 @@
             return filtered;
         }
 
+        function clearMessageListener() {
+            if (currentMessageUnsubscribe) {
+                currentMessageUnsubscribe(); // Detaches the old Firebase listener
+                currentMessageUnsubscribe = null;
+            }
+        }
+
         loadPublicMessages();
 
         function loadPublicMessages() {
             if (currentServer !== "public" || currentChannel !== "general") return;
+            clearMessageListener();
             const messagesDiv = document.getElementById("messages");
-            messagesDiv.innerHTML = "";
             
-            onChildAdded(ref(db, 'messages/general'), (snapshot) => {
+            currentMessageUnsubscribe = onValue(ref(db, 'messages/general'), (snapshot) => {
                 if (currentServer !== "public" || currentChannel !== "general") return;
-                const data = snapshot.val();
-                appendMessage(data.author, data.text, data.imageUrl);
+                messagesDiv.innerHTML = "";
+                snapshot.forEach((childSnapshot) => {
+                    const data = childSnapshot.val();
+                    appendMessage(data.author, data.text, data.imageUrl, childSnapshot.key, 'general');
+                });
+                messagesDiv.scrollTop = messagesDiv.scrollHeight;
             });
         }
 
-        function appendMessage(author, text, imageUrl) {
+        function appendMessage(author, text, imageUrl, messageKey, chatType, pathId) {
             const messagesDiv = document.getElementById("messages");
             const msgElement = document.createElement("div");
             msgElement.className = "message";
@@ -357,8 +375,24 @@
                 </div>
                 ${contentHTML}
             `;
+
+            // Right-click event to unsend message
+            msgElement.oncontextmenu = function(e) {
+                e.preventDefault();
+                if (author === myName) {
+                    if (confirm("Unsend this message?")) {
+                        if (chatType === 'general') {
+                            remove(ref(db, 'messages/general/' + messageKey));
+                        } else if (chatType === 'dm') {
+                            remove(ref(db, 'dms/' + pathId + '/' + messageKey));
+                        }
+                    }
+                } else {
+                    alert("You can only unsend your own messages.");
+                }
+            };
+
             messagesDiv.appendChild(msgElement);
-            messagesDiv.scrollTop = messagesDiv.scrollHeight;
         }
 
         // Send Text Message
@@ -495,6 +529,7 @@
             const header = document.getElementById("chat-header");
 
             if (channel === 'rules') {
+                clearMessageListener();
                 msgs.style.display = "none";
                 inputArea.style.display = "none";
                 rules.style.display = "block";
@@ -511,6 +546,7 @@
         window.switchToDMHome = function() {
             currentServer = "dm";
             currentChannel = "";
+            clearMessageListener();
 
             document.getElementById("pub-icon").classList.remove("active-server");
             document.getElementById("dm-icon").classList.add("active-server");
@@ -539,6 +575,7 @@
 
             currentServer = "dm";
             currentChannel = targetUser;
+            clearMessageListener();
 
             document.getElementById("pub-icon").classList.remove("active-server");
             document.getElementById("dm-icon").classList.add("active-server");
@@ -569,12 +606,12 @@
             const dmPathId = [myName, targetUser].sort().join("_");
             const messagesDiv = document.getElementById("messages");
 
-            onValue(ref(db, 'dms/' + dmPathId), (snapshot) => {
+            currentMessageUnsubscribe = onValue(ref(db, 'dms/' + dmPathId), (snapshot) => {
                 if (currentServer !== "dm" || currentChannel !== targetUser) return;
                 messagesDiv.innerHTML = "";
                 snapshot.forEach((childSnapshot) => {
                     const data = childSnapshot.val();
-                    appendMessage(data.author, data.text, data.imageUrl);
+                    appendMessage(data.author, data.text, data.imageUrl, childSnapshot.key, 'dm', dmPathId);
                 });
                 messagesDiv.scrollTop = messagesDiv.scrollHeight;
             });
