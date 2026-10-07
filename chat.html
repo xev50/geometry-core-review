@@ -136,7 +136,6 @@
 </head>
 <body>
 
-    <!-- Hidden audio element for receiving calls -->
     <audio id="remote-audio" autoplay></audio>
 
     <!-- Login Overlay -->
@@ -145,7 +144,7 @@
             <h2 style="text-align: center;">Sign In</h2>
             <input type="text" id="login-username" placeholder="Username" autocomplete="off">
             <input type="password" id="login-password" placeholder="Password">
-            <button class="btn-primary" onclick="window.attemptLogin()">Join Chat</button>
+            <button class="btn-primary" id="login-btn">Join Chat</button>
             <div id="login-error" style="color:var(--error); font-size:14px; display:none; text-align:center;"></div>
         </div>
     </div>
@@ -156,8 +155,8 @@
             <h3 style="margin-bottom: 5px;">Incoming Call</h3>
             <p id="caller-name" style="margin-top: 0; color: var(--text-muted);"></p>
             <div class="call-buttons">
-                <button class="btn-success" onclick="window.acceptCall()">Accept</button>
-                <button class="btn-danger" onclick="window.declineCall()">Decline</button>
+                <button class="btn-success" id="accept-call-btn">Accept</button>
+                <button class="btn-danger" id="decline-call-btn">Decline</button>
             </div>
         </div>
     </div>
@@ -167,14 +166,14 @@
         <div class="modal-box">
             <div style="display: flex; justify-content: space-between; align-items: center;">
                 <h2>User Settings</h2>
-                <button class="close-btn" onclick="document.getElementById('settings-modal').style.display='none'">✖</button>
+                <button class="close-btn" id="close-settings-btn">✖</button>
             </div>
             <div class="settings-group"><label>Change Username</label><input type="text" id="setting-name"></div>
             <div class="settings-group"><label>Theme</label><select id="setting-theme"><option value="dark">Dark Mode</option><option value="light">Light Mode</option></select></div>
-            <div class="settings-group"><label>Call Volume</label><input type="range" id="setting-volume" min="0" max="1" step="0.05" value="1" oninput="window.updateVolume()"></div>
+            <div class="settings-group"><label>Call Volume</label><input type="range" id="setting-volume" min="0" max="1" step="0.05" value="1"></div>
             <div class="settings-group"><label>Microphone (Input)</label><select id="setting-mic"></select></div>
             <div class="settings-group"><label>Headphones (Output)</label><select id="setting-speaker"></select></div>
-            <button class="btn-primary" style="margin-top: 10px;" onclick="window.saveSettings()">Save Changes</button>
+            <button class="btn-primary" id="save-settings-btn" style="margin-top: 10px;">Save Changes</button>
         </div>
     </div>
 
@@ -183,20 +182,20 @@
         <div class="modal-box">
             <div style="display: flex; justify-content: space-between; align-items: center;">
                 <h2>Create Group Chat</h2>
-                <button class="close-btn" onclick="document.getElementById('create-group-modal').style.display='none'">✖</button>
+                <button class="close-btn" id="close-group-modal-btn">✖</button>
             </div>
             <input type="text" id="group-name-input" placeholder="Group Name">
             <div class="settings-group"><label>Select Friends</label><div class="checkbox-list" id="group-friends-list"></div></div>
-            <button class="btn-primary" onclick="window.submitCreateGroup()">Create</button>
+            <button class="btn-primary" id="submit-group-btn">Create</button>
         </div>
     </div>
 
     <!-- Main Layout -->
     <div class="server-bar">
-        <div class="server-icon active-server" id="pub-icon" title="Public Server" onclick="window.switchToPublic()">
+        <div class="server-icon active-server" id="pub-icon" title="Public Server">
             PUB<div class="server-badge" id="pub-badge">0</div>
         </div>
-        <div class="server-icon" id="dm-icon" title="Direct Messages" onclick="window.switchToFriendsHome()">
+        <div class="server-icon" id="dm-icon" title="Direct Messages">
             DMs<div class="server-badge" id="dm-badge">0</div>
         </div>
     </div>
@@ -204,7 +203,7 @@
     <div class="sidebar">
         <div class="sidebar-header" id="sidebar-header">
             <span id="sidebar-title">Public Server</span>
-            <button id="add-group-btn" class="settings-btn" style="display:none;" title="Create Group Chat" onclick="window.openCreateGroupModal()">➕</button>
+            <button id="add-group-btn" class="settings-btn" style="display:none;" title="Create Group Chat">➕</button>
         </div>
         <div class="channel-list" id="channel-list"></div>
         <div class="settings-bar">
@@ -213,8 +212,8 @@
                 <span id="display-name" style="font-weight:bold; font-size:14px;">Loading...</span>
             </div>
             <div>
-                <button class="settings-btn" onclick="window.openSettings()" title="Settings">⚙️</button>
-                <button class="settings-btn" onclick="window.logout()" title="Logout">🚪</button>
+                <button class="settings-btn" id="open-settings-btn" title="Settings">⚙️</button>
+                <button class="settings-btn" id="logout-btn" title="Logout">🚪</button>
             </div>
         </div>
     </div>
@@ -224,7 +223,7 @@
         <div class="chat-header">
             <div style="display: flex; align-items: center; gap: 10px;" id="chat-header-text"># general</div>
             <div class="call-controls" id="call-controls" style="display:none;">
-                <button class="btn-success btn-small" id="start-call-btn" onclick="window.initiateCall()">📞 Start Call</button>
+                <button class="btn-success btn-small" id="start-call-btn">📞 Start Call</button>
             </div>
         </div>
         
@@ -243,9 +242,9 @@
                 </div>
             </div>
             <div class="call-toolbar">
-                <button class="btn-primary btn-small" id="cam-toggle-btn" onclick="window.toggleCamera()">📷 Cam Off</button>
-                <button class="btn-warning btn-small" id="screen-toggle-btn" onclick="window.toggleScreenShare()" style="color:black;">📺 Share Screen</button>
-                <button class="btn-danger btn-small" onclick="window.endCall()">🛑 Disconnect</button>
+                <button class="btn-primary btn-small" id="cam-toggle-btn">📷 Cam Off</button>
+                <button class="btn-warning btn-small" id="screen-toggle-btn" style="color:black;">📺 Share Screen</button>
+                <button class="btn-danger btn-small" id="end-call-btn">🛑 Disconnect</button>
             </div>
         </div>
 
@@ -253,9 +252,9 @@
         <div id="rules-content" style="display:none; padding: 20px;"><h2>Server Rules</h2><ol><li>No slurs or offensive language.</li><li>No NSFW content.</li><li>Be respectful.</li></ol></div>
 
         <div class="input-area" id="input-area">
-            <input type="file" id="image-file-input" accept="image/*" style="display: none;" onchange="window.handleImageUpload(event)">
-            <button class="upload-btn" onclick="document.getElementById('image-file-input').click()" title="Send Image">📷</button>
-            <input type="text" class="chat-input" id="message-input" placeholder="Message..." onkeypress="window.handleKeyPress(event)">
+            <input type="file" id="image-file-input" accept="image/*" style="display: none;">
+            <button class="upload-btn" id="upload-img-btn" title="Send Image">📷</button>
+            <input type="text" class="chat-input" id="message-input" placeholder="Message...">
         </div>
     </div>
 
@@ -265,7 +264,7 @@
             <h2>Friends</h2>
             <div class="add-friend-box">
                 <input type="text" id="add-friend-input" placeholder="Enter username to add friend">
-                <button class="btn-primary" onclick="window.sendFriendRequest()">Send Request</button>
+                <button class="btn-primary" id="send-friend-btn">Send Request</button>
             </div>
         </div>
         <div style="display:flex; gap: 30px;">
@@ -382,7 +381,7 @@
         }
 
         // --- LOGIN & AUTH ---
-        window.attemptLogin = function() {
+        function attemptLogin() {
             if (audioCtx.state === 'suspended') audioCtx.resume();
             const user = document.getElementById("login-username").value.trim();
             const pass = document.getElementById("login-password").value.trim();
@@ -399,17 +398,17 @@
                     document.getElementById("display-name").innerText = myName;
                     document.getElementById("my-footer-avatar").innerText = myName.charAt(0).toUpperCase();
                     set(ref(db, 'users/' + myName + '/online'), true);
-                    setupVoiceCalling(); startGlobalListeners(); window.switchToPublic();
+                    setupVoiceCalling(); startGlobalListeners(); switchToPublic('general');
                 }
             }).catch(() => { errorDiv.innerText = "Database error."; errorDiv.style.display = "block"; });
         }
-        window.logout = function() {
+        function logout() {
             if(myName) set(ref(db, 'users/' + myName + '/online'), null);
             localStorage.clear(); location.reload();
         }
 
         // --- SETTINGS ---
-        window.openSettings = async function() {
+        async function openSettings() {
             document.getElementById('settings-modal').style.display = 'flex';
             document.getElementById('setting-name').value = myName;
             document.getElementById('setting-theme').value = document.body.getAttribute('data-theme') === 'light' ? 'light' : 'dark';
@@ -424,8 +423,8 @@
                 });
             } catch (err) {}
         }
-        window.updateVolume = function() { document.getElementById('remote-audio').volume = document.getElementById('setting-volume').value; }
-        window.saveSettings = async function() {
+        function updateVolume() { document.getElementById('remote-audio').volume = document.getElementById('setting-volume').value; }
+        function saveSettings() {
             const theme = document.getElementById('setting-theme').value;
             if (theme === 'light') { document.body.setAttribute("data-theme", "light"); localStorage.setItem("chatTheme", "light"); }
             else { document.body.removeAttribute("data-theme"); localStorage.setItem("chatTheme", "dark"); }
@@ -444,7 +443,7 @@
             });
         }
 
-        window.acceptCall = async function() {
+        async function acceptCall() {
             document.getElementById('call-notification').style.display = 'none'; stopRinging(); playJoin();
             if(!incomingCallObj) return;
 
@@ -466,12 +465,12 @@
             } catch(e) { alert("Microphone access required."); resetCallUI(); }
         }
 
-        window.declineCall = function() {
+        function declineCall() {
             document.getElementById('call-notification').style.display = 'none'; stopRinging(); playLeave();
             if(incomingCallObj) incomingCallObj.close(); incomingCallObj = null;
         }
 
-        window.initiateCall = async function() {
+        async function initiateCall() {
             if (viewContext !== "dm" || !currentChannelId) return;
             try {
                 localStream = await navigator.mediaDevices.getUserMedia({ audio: selectedMicId === 'default' ? true : { deviceId: { exact: selectedMicId } }, video: false });
@@ -492,7 +491,7 @@
             } catch(err) { alert("Microphone access required."); }
         }
 
-        window.toggleCamera = async function() {
+        async function toggleCamera() {
             if(!activeCall) return;
             const localVideo = document.getElementById('local-video');
             const localAvatar = document.getElementById('local-avatar');
@@ -501,7 +500,7 @@
                 try {
                     const camStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
                     const videoTrack = camStream.getVideoTracks()[0];
-                    const sender = activeCall.peerConnection.getSenders().find(s => s.track.kind === 'video');
+                    const sender = activeCall.peerConnection.getSenders().find(s => s.track && s.track.kind === 'video');
                     if(sender) sender.replaceTrack(videoTrack);
                     
                     localVideo.srcObject = camStream;
@@ -512,7 +511,7 @@
                     document.getElementById('screen-toggle-btn').innerText = "📺 Share Screen";
                 } catch(e) { alert("Could not access camera."); }
             } else {
-                const sender = activeCall.peerConnection.getSenders().find(s => s.track.kind === 'video');
+                const sender = activeCall.peerConnection.getSenders().find(s => s.track && s.track.kind === 'video');
                 if(sender) sender.replaceTrack(null);
 
                 localVideo.srcObject = null;
@@ -523,7 +522,7 @@
             }
         }
 
-        window.toggleScreenShare = async function() {
+        async function toggleScreenShare() {
             if(!activeCall) return;
             const localVideo = document.getElementById('local-video');
             const localAvatar = document.getElementById('local-avatar');
@@ -532,7 +531,7 @@
                 try {
                     const screenStream = await navigator.mediaDevices.getDisplayMedia({ video: true });
                     const videoTrack = screenStream.getVideoTracks()[0];
-                    const sender = activeCall.peerConnection.getSenders().find(s => s.track.kind === 'video');
+                    const sender = activeCall.peerConnection.getSenders().find(s => s.track && s.track.kind === 'video');
                     if(sender) sender.replaceTrack(videoTrack);
 
                     localVideo.srcObject = screenStream;
@@ -542,10 +541,10 @@
                     document.getElementById('screen-toggle-btn').innerText = "📺 Stop Sharing";
                     document.getElementById('cam-toggle-btn').innerText = "📷 Cam Off";
 
-                    videoTrack.onended = () => { window.toggleScreenShare(); };
+                    videoTrack.onended = () => { toggleScreenShare(); };
                 } catch(e) {}
             } else {
-                const sender = activeCall.peerConnection.getSenders().find(s => s.track.kind === 'video');
+                const sender = activeCall.peerConnection.getSenders().find(s => s.track && s.track.kind === 'video');
                 if(sender) sender.replaceTrack(null);
 
                 localVideo.srcObject = null;
@@ -556,7 +555,7 @@
             }
         }
 
-        window.endCall = function() {
+        function endCall() {
             if (activeCall) activeCall.close();
             playLeave(); resetCallUI();
         }
@@ -654,7 +653,7 @@
         }
 
         // --- FRIENDS & GROUPS ---
-        window.sendFriendRequest = function() {
+        function sendFriendRequest() {
             const target = document.getElementById("add-friend-input").value.trim();
             if(!target || target === myName) return;
             get(child(ref(db), `auth/${target}`)).then(snap => {
@@ -665,22 +664,22 @@
                 } else alert("User not found.");
             });
         }
-        window.acceptFriend = function(target) {
+        function acceptFriend(target) {
             set(ref(db, `users/${myName}/friends/${target}`), "accepted"); 
             set(ref(db, `users/${target}/friends/${myName}`), "accepted");
         }
-        window.removeFriend = function(target) {
+        function removeFriend(target) {
             remove(ref(db, `users/${myName}/friends/${target}`)); 
             remove(ref(db, `users/${target}/friends/${myName}`));
         }
 
-        window.openCreateGroupModal = function() {
+        function openCreateGroupModal() {
             const list = document.getElementById('group-friends-list'); list.innerHTML = '';
             for(let f in myFriends) { if(myFriends[f] === "accepted") list.innerHTML += `<label><input type="checkbox" value="${f}"> ${f}</label>`; }
             if(list.innerHTML === '') list.innerHTML = '<span style="color:var(--text-muted); font-size:12px;">No accepted friends.</span>';
             document.getElementById('create-group-modal').style.display = 'flex';
         }
-        window.submitCreateGroup = function() {
+        function submitCreateGroup() {
             const name = document.getElementById('group-name-input').value.trim() || "New Group";
             const checkboxes = document.querySelectorAll('#group-friends-list input:checked');
             if(checkboxes.length === 0) { alert("Select at least one friend."); return; }
@@ -689,19 +688,33 @@
             document.getElementById('create-group-modal').style.display = 'none';
         }
 
-        // --- RENDERING ---
+        // --- RENDERING (USING DOM OBJECTS INSTEAD OF INLINE STRINGS) ---
         function renderFriendsDashboard() {
             const pendList = document.getElementById("pending-friends-list"); const accList = document.getElementById("accepted-friends-list");
             pendList.innerHTML = ''; accList.innerHTML = '';
+            
             for(let f in myFriends) {
                 const status = myFriends[f];
                 if(status === "pending_incoming") {
-                    pendList.innerHTML += `<div class="friend-row"><span>👤 ${f}</span><div class="friend-actions"><button class="btn-success btn-small" onclick="window.acceptFriend('${f}')">✓</button><button class="btn-danger btn-small" onclick="window.removeFriend('${f}')">✖</button></div></div>`;
+                    const row = document.createElement("div"); row.className = "friend-row";
+                    row.innerHTML = `<span>👤 ${f}</span>`;
+                    const act = document.createElement("div"); act.className = "friend-actions";
+                    const b1 = document.createElement("button"); b1.className = "btn-success btn-small"; b1.innerText = "✓"; b1.onclick = () => acceptFriend(f);
+                    const b2 = document.createElement("button"); b2.className = "btn-danger btn-small"; b2.innerText = "✖"; b2.onclick = () => removeFriend(f);
+                    act.append(b1, b2); row.appendChild(act); pendList.appendChild(row);
                 } else if(status === "pending_outgoing") {
-                    pendList.innerHTML += `<div class="friend-row"><span>👤 ${f} (Pending)</span><button class="btn-danger btn-small" onclick="window.removeFriend('${f}')">Cancel</button></div>`;
+                    const row = document.createElement("div"); row.className = "friend-row";
+                    row.innerHTML = `<span>👤 ${f} (Pending)</span>`;
+                    const b = document.createElement("button"); b.className = "btn-danger btn-small"; b.innerText = "Cancel"; b.onclick = () => removeFriend(f);
+                    row.appendChild(b); pendList.appendChild(row);
                 } else if(status === "accepted") {
                     const isOnline = onlineUsers[f] && onlineUsers[f].online ? '🟢' : '⚪';
-                    accList.innerHTML += `<div class="friend-row"><span>${isOnline} ${f}</span><div class="friend-actions"><button class="btn-primary btn-small" onclick="window.switchToDM('${f}')">Message</button><button class="btn-danger btn-small" onclick="window.removeFriend('${f}')">Remove</button></div></div>`;
+                    const row = document.createElement("div"); row.className = "friend-row";
+                    row.innerHTML = `<span>${isOnline} ${f}</span>`;
+                    const act = document.createElement("div"); act.className = "friend-actions";
+                    const b1 = document.createElement("button"); b1.className = "btn-primary btn-small"; b1.innerText = "Message"; b1.onclick = () => switchToDM(f);
+                    const b2 = document.createElement("button"); b2.className = "btn-danger btn-small"; b2.innerText = "Remove"; b2.onclick = () => removeFriend(f);
+                    act.append(b1, b2); row.appendChild(act); accList.appendChild(row);
                 }
             }
             if(pendList.innerHTML === '') pendList.innerHTML = '<div style="color:var(--text-muted); font-size:12px;">No pending requests.</div>';
@@ -730,39 +743,74 @@
         function renderPublicSidebar() {
             document.getElementById("sidebar-title").innerText = "Public Server";
             document.getElementById("add-group-btn").style.display = "none";
+            const channelList = document.getElementById("channel-list");
+            channelList.innerHTML = '';
+            
             let genBadge = unreadCounts.general > 0 ? `<div class="channel-badge" style="display:block;">${unreadCounts.general}</div>` : '';
             
-            document.getElementById("channel-list").innerHTML = `
-                <div class="channel ${currentChannelId === 'general' ? 'active' : ''}" onclick="window.switchToPublic('general')"><div class="channel-left"># general</div> ${genBadge}</div>
-                <div class="channel ${currentChannelId === 'rules' ? 'active' : ''}" onclick="window.switchToPublic('rules')"><div class="channel-left"># rules</div></div>
-            `;
+            const c1 = document.createElement("div"); c1.className = `channel ${currentChannelId === 'general' ? 'active' : ''}`;
+            c1.innerHTML = `<div class="channel-left"># general</div> ${genBadge}`;
+            c1.onclick = () => switchToPublic('general');
+            
+            const c2 = document.createElement("div"); c2.className = `channel ${currentChannelId === 'rules' ? 'active' : ''}`;
+            c2.innerHTML = `<div class="channel-left"># rules</div>`;
+            c2.onclick = () => switchToPublic('rules');
+            
+            channelList.append(c1, c2);
+
             const memList = document.getElementById("member-list-ui");
             memList.innerHTML = '<div style="font-size: 12px; font-weight: bold; margin-bottom: 10px; color: var(--text-muted);">ONLINE</div>';
             for (let u in onlineUsers) {
-                if(onlineUsers[u].online) memList.innerHTML += `<div class="member" onclick="window.switchToDM('${u}')"><div class="user-avatar-sm" style="width:24px;height:24px;font-size:11px;">${u.charAt(0).toUpperCase()}</div>${u}</div>`;
+                if(onlineUsers[u].online) {
+                    const mEl = document.createElement("div"); mEl.className = "member";
+                    mEl.innerHTML = `<div class="user-avatar-sm" style="width:24px;height:24px;font-size:11px;">${u.charAt(0).toUpperCase()}</div>${u}`;
+                    mEl.onclick = () => switchToDM(u);
+                    memList.appendChild(mEl);
+                }
             }
         }
 
         function renderDMSidebar() {
             document.getElementById("sidebar-title").innerText = "Direct Messages";
             document.getElementById("add-group-btn").style.display = "block";
-            
-            let html = `<div class="channel ${viewContext === 'friends' ? 'active' : ''}" onclick="window.switchToFriendsHome()" style="margin-bottom:15px;"><div class="channel-left">👋 Friends Dashboard</div></div>`;
-            
-            html += '<div style="font-size: 11px; font-weight: bold; margin-bottom: 8px; color: var(--text-muted); padding: 4px;">DIRECT MESSAGES</div>';
+            const channelList = document.getElementById("channel-list");
+            channelList.innerHTML = '';
+
+            const dash = document.createElement("div"); dash.className = `channel ${viewContext === 'friends' ? 'active' : ''}`;
+            dash.style.marginBottom = "15px";
+            dash.innerHTML = `<div class="channel-left">👋 Friends Dashboard</div>`;
+            dash.onclick = () => switchToFriendsHome();
+            channelList.appendChild(dash);
+
+            const dmHeader = document.createElement("div");
+            dmHeader.style.cssText = "font-size: 11px; font-weight: bold; margin-bottom: 8px; color: var(--text-muted); padding: 4px;";
+            dmHeader.innerText = "DIRECT MESSAGES";
+            channelList.appendChild(dmHeader);
+
             for(let f in myFriends) {
                 if(myFriends[f] === "accepted") {
                     let uBadge = (unreadCounts.dms[f] > 0) ? `<div class="channel-badge" style="display:block;">${unreadCounts.dms[f]}</div>` : '';
-                    html += `<div class="channel ${(viewContext === 'dm' && currentChannelId === f) ? 'active' : ''}" onclick="window.switchToDM('${f}')"><div class="channel-left"><div class="user-avatar-sm" style="width:24px;height:24px;font-size:11px;">${f.charAt(0).toUpperCase()}</div> ${f}</div> ${uBadge}</div>`;
+                    const fEl = document.createElement("div");
+                    fEl.className = `channel ${(viewContext === 'dm' && currentChannelId === f) ? 'active' : ''}`;
+                    fEl.innerHTML = `<div class="channel-left"><div class="user-avatar-sm" style="width:24px;height:24px;font-size:11px;">${f.charAt(0).toUpperCase()}</div> ${f}</div> ${uBadge}`;
+                    fEl.onclick = () => switchToDM(f);
+                    channelList.appendChild(fEl);
                 }
             }
-            
-            html += '<div style="font-size: 11px; font-weight: bold; margin-top: 15px; margin-bottom: 8px; color: var(--text-muted); padding: 4px;">GROUP CHATS</div>';
+
+            const grpHeader = document.createElement("div");
+            grpHeader.style.cssText = "font-size: 11px; font-weight: bold; margin-top: 15px; margin-bottom: 8px; color: var(--text-muted); padding: 4px;";
+            grpHeader.innerText = "GROUP CHATS";
+            channelList.appendChild(grpHeader);
+
             for(let g in myGroups) {
                 let gBadge = (unreadCounts.groups[g] > 0) ? `<div class="channel-badge" style="display:block;">${unreadCounts.groups[g]}</div>` : '';
-                html += `<div class="channel ${(viewContext === 'group' && currentChannelId === g) ? 'active' : ''}" onclick="window.switchToGroup('${g}')"><div class="channel-left">👥 ${myGroups[g].name}</div> ${gBadge}</div>`;
+                const gEl = document.createElement("div");
+                gEl.className = `channel ${(viewContext === 'group' && currentChannelId === g) ? 'active' : ''}`;
+                gEl.innerHTML = `<div class="channel-left">👥 ${myGroups[g].name}</div> ${gBadge}`;
+                gEl.onclick = () => switchToGroup(g);
+                channelList.appendChild(gEl);
             }
-            document.getElementById("channel-list").innerHTML = html;
         }
 
         // --- NAVIGATION ---
@@ -775,7 +823,7 @@
             if(showFriends) renderFriendsDashboard();
         }
 
-        window.switchToPublic = function(channel = 'general') {
+        function switchToPublic(channel = 'general') {
             viewContext = "public"; currentChannelId = channel;
             if (channel === 'general') { unreadCounts.general = 0; updateBadges(); }
             document.getElementById("pub-icon").classList.add("active-server"); document.getElementById("dm-icon").classList.remove("active-server");
@@ -786,7 +834,7 @@
             else { setMainVisibility(true, false, false); document.getElementById("chat-header-text").innerText = "# general"; get(ref(db, 'messages/general')).then(s => { if(s.val()) renderMessages(s.val(), 'general', null); else document.getElementById("messages").innerHTML=""; }); }
         }
 
-        window.switchToFriendsHome = function() {
+        function switchToFriendsHome() {
             viewContext = "friends"; currentChannelId = "";
             document.getElementById("pub-icon").classList.remove("active-server"); document.getElementById("dm-icon").classList.add("active-server");
             document.getElementById("call-controls").style.display = "none";
@@ -794,11 +842,11 @@
             renderDMSidebar(); setMainVisibility(false, true, false);
         }
 
-        window.switchToDM = function(targetUser) {
+        function switchToDM(targetUser) {
             if (targetUser === myName) return;
             if (!myFriends[targetUser] || myFriends[targetUser] !== "accepted") {
                 if(!confirm(`Send friend request to ${targetUser}?`)) return;
-                window.sendFriendRequest(targetUser); return;
+                sendFriendRequest(targetUser); return;
             }
             
             viewContext = "dm"; currentChannelId = targetUser;
@@ -816,7 +864,7 @@
             document.getElementById("member-list-ui").innerHTML = `<div style="text-align: center; padding-top: 15px;"><div style="width: 72px; height: 72px; background-color: var(--accent); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 28px; font-weight: bold; color: white; margin: 0 auto 10px;">${targetUser.charAt(0).toUpperCase()}</div><div style="font-weight: bold; font-size: 16px;">${targetUser}</div></div>`;
         }
 
-        window.switchToGroup = function(groupId) {
+        function switchToGroup(groupId) {
             viewContext = "group"; currentChannelId = groupId;
             unreadCounts.groups[groupId] = 0; updateBadges();
             document.getElementById("pub-icon").classList.remove("active-server"); document.getElementById("dm-icon").classList.add("active-server");
@@ -828,8 +876,14 @@
             renderMessages(grp.messages || {}, 'group', groupId);
             
             let memUI = `<div style="font-size: 12px; font-weight: bold; margin-bottom: 10px; color: var(--text-muted);">MEMBERS</div>`;
-            for(let m in grp.members) memUI += `<div class="member" onclick="window.switchToDM('${m}')"><div class="user-avatar-sm" style="width:24px;height:24px;font-size:11px;">${m.charAt(0).toUpperCase()}</div>${m}</div>`;
+            for(let m in grp.members) {
+                memUI += `<div class="member" id="member-${m}"><div class="user-avatar-sm" style="width:24px;height:24px;font-size:11px;">${m.charAt(0).toUpperCase()}</div>${m}</div>`;
+            }
             document.getElementById("member-list-ui").innerHTML = memUI;
+            for(let m in grp.members) {
+                const el = document.getElementById(`member-${m}`);
+                if(el) el.onclick = () => switchToDM(m);
+            }
         }
 
         // --- MESSAGING ---
@@ -837,17 +891,23 @@
         function filterMessage(text) {
             let filtered = text; blocklist.forEach(w => filtered = filtered.replace(new RegExp(`\\b${w}\\b`, "gi"), "***")); return filtered;
         }
-        window.handleKeyPress = function(e) {
+        
+        document.getElementById("message-input").onkeypress = function(e) {
             if (e.key === 'Enter') {
                 const input = document.getElementById("message-input"); let text = input.value.trim();
                 if (text !== "") { sendMessageData(filterMessage(text), null); input.value = ""; }
             }
-        }
-        window.handleImageUpload = function(event) {
+        };
+
+        const imageInput = document.getElementById("image-file-input");
+        imageInput.onchange = function(event) {
             const file = event.target.files[0]; if (!file) return;
             const reader = new FileReader(); reader.onload = function(e) { sendMessageData("", e.target.result); };
             reader.readAsDataURL(file); event.target.value = "";
-        }
+        };
+
+        document.getElementById("upload-img-btn").onclick = () => imageInput.click();
+
         function sendMessageData(text, imageUrl) {
             const payload = { author: myName, text: text, imageUrl: imageUrl || "", timestamp: Date.now() };
             if (viewContext === "public") push(ref(db, 'messages/general'), payload);
@@ -855,12 +915,31 @@
             else if (viewContext === "group") push(ref(db, `groups/${currentChannelId}/messages`), payload);
         }
 
+        // --- UI EVENT BINDINGS ---
+        document.getElementById("login-btn").onclick = attemptLogin;
+        document.getElementById("accept-call-btn").onclick = acceptCall;
+        document.getElementById("decline-call-btn").onclick = declineCall;
+        document.getElementById("pub-icon").onclick = () => switchToPublic('general');
+        document.getElementById("dm-icon").onclick = switchToFriendsHome;
+        document.getElementById("open-settings-btn").onclick = openSettings;
+        document.getElementById("logout-btn").onclick = logout;
+        document.getElementById("close-settings-btn").onclick = () => document.getElementById('settings-modal').style.display = 'none';
+        document.getElementById("save-settings-btn").onclick = saveSettings;
+        document.getElementById("add-group-btn").onclick = openCreateGroupModal;
+        document.getElementById("close-group-modal-btn").onclick = () => document.getElementById('create-group-modal').style.display = 'none';
+        document.getElementById("submit-group-btn").onclick = submitCreateGroup;
+        document.getElementById("send-friend-btn").onclick = sendFriendRequest;
+        document.getElementById("start-call-btn").onclick = initiateCall;
+        document.getElementById("cam-toggle-btn").onclick = toggleCamera;
+        document.getElementById("screen-toggle-btn").onclick = toggleScreenShare;
+        document.getElementById("end-call-btn").onclick = endCall;
+
         // --- INIT ---
         const savedName = localStorage.getItem("chatUsername");
         const savedPass = localStorage.getItem("chatPassword");
         if (localStorage.getItem("chatTheme") === "light") document.body.setAttribute("data-theme", "light");
         if (savedName && savedPass) {
-            setTimeout(() => { document.getElementById("login-username").value = savedName; document.getElementById("login-password").value = savedPass; window.attemptLogin(); }, 100);
+            setTimeout(() => { document.getElementById("login-username").value = savedName; document.getElementById("login-password").value = savedPass; attemptLogin(); }, 100);
         }
     </script>
 </body>
