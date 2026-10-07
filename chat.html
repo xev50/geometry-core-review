@@ -120,7 +120,6 @@
         .member { padding: 8px; color: var(--text-muted); cursor: pointer; border-radius: 4px; display: flex; align-items: center; gap: 8px; }
         .member:hover { background-color: var(--hover); color: var(--text-main); }
         
-        /* Avatar Profile Circle */
         .user-avatar-sm { width: 32px; height: 32px; background-color: var(--accent); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; color: white; font-size: 14px; flex-shrink: 0; border: 2px solid transparent; }
         .user-avatar-sm.speaking { border-color: var(--success); box-shadow: 0 0 8px var(--success); }
 
@@ -146,7 +145,7 @@
             <h2 style="text-align: center;">Sign In</h2>
             <input type="text" id="login-username" placeholder="Username" autocomplete="off">
             <input type="password" id="login-password" placeholder="Password">
-            <button class="btn-primary" onclick="attemptLogin()">Join Chat</button>
+            <button class="btn-primary" onclick="window.attemptLogin()">Join Chat</button>
             <div id="login-error" style="color:var(--error); font-size:14px; display:none; text-align:center;"></div>
         </div>
     </div>
@@ -157,8 +156,8 @@
             <h3 style="margin-bottom: 5px;">Incoming Call</h3>
             <p id="caller-name" style="margin-top: 0; color: var(--text-muted);"></p>
             <div class="call-buttons">
-                <button class="btn-success" onclick="acceptCall()">Accept</button>
-                <button class="btn-danger" onclick="declineCall()">Decline</button>
+                <button class="btn-success" onclick="window.acceptCall()">Accept</button>
+                <button class="btn-danger" onclick="window.declineCall()">Decline</button>
             </div>
         </div>
     </div>
@@ -172,10 +171,10 @@
             </div>
             <div class="settings-group"><label>Change Username</label><input type="text" id="setting-name"></div>
             <div class="settings-group"><label>Theme</label><select id="setting-theme"><option value="dark">Dark Mode</option><option value="light">Light Mode</option></select></div>
-            <div class="settings-group"><label>Call Volume</label><input type="range" id="setting-volume" min="0" max="1" step="0.05" value="1" oninput="updateVolume()"></div>
+            <div class="settings-group"><label>Call Volume</label><input type="range" id="setting-volume" min="0" max="1" step="0.05" value="1" oninput="window.updateVolume()"></div>
             <div class="settings-group"><label>Microphone (Input)</label><select id="setting-mic"></select></div>
             <div class="settings-group"><label>Headphones (Output)</label><select id="setting-speaker"></select></div>
-            <button class="btn-primary" style="margin-top: 10px;" onclick="saveSettings()">Save Changes</button>
+            <button class="btn-primary" style="margin-top: 10px;" onclick="window.saveSettings()">Save Changes</button>
         </div>
     </div>
 
@@ -188,16 +187,16 @@
             </div>
             <input type="text" id="group-name-input" placeholder="Group Name">
             <div class="settings-group"><label>Select Friends</label><div class="checkbox-list" id="group-friends-list"></div></div>
-            <button class="btn-primary" onclick="submitCreateGroup()">Create</button>
+            <button class="btn-primary" onclick="window.submitCreateGroup()">Create</button>
         </div>
     </div>
 
     <!-- Main Layout -->
     <div class="server-bar">
-        <div class="server-icon active-server" id="pub-icon" title="Public Server" onclick="switchToPublic()">
+        <div class="server-icon active-server" id="pub-icon" title="Public Server" onclick="window.switchToPublic()">
             PUB<div class="server-badge" id="pub-badge">0</div>
         </div>
-        <div class="server-icon" id="dm-icon" title="Direct Messages" onclick="switchToFriendsHome()">
+        <div class="server-icon" id="dm-icon" title="Direct Messages" onclick="window.switchToFriendsHome()">
             DMs<div class="server-badge" id="dm-badge">0</div>
         </div>
     </div>
@@ -205,7 +204,7 @@
     <div class="sidebar">
         <div class="sidebar-header" id="sidebar-header">
             <span id="sidebar-title">Public Server</span>
-            <button id="add-group-btn" class="settings-btn" style="display:none;" title="Create Group Chat" onclick="openCreateGroupModal()">➕</button>
+            <button id="add-group-btn" class="settings-btn" style="display:none;" title="Create Group Chat" onclick="window.openCreateGroupModal()">➕</button>
         </div>
         <div class="channel-list" id="channel-list"></div>
         <div class="settings-bar">
@@ -214,8 +213,8 @@
                 <span id="display-name" style="font-weight:bold; font-size:14px;">Loading...</span>
             </div>
             <div>
-                <button class="settings-btn" onclick="openSettings()" title="Settings">⚙️</button>
-                <button class="settings-btn" onclick="logout()" title="Logout">🚪</button>
+                <button class="settings-btn" onclick="window.openSettings()" title="Settings">⚙️</button>
+                <button class="settings-btn" onclick="window.logout()" title="Logout">🚪</button>
             </div>
         </div>
     </div>
@@ -225,31 +224,28 @@
         <div class="chat-header">
             <div style="display: flex; align-items: center; gap: 10px;" id="chat-header-text"># general</div>
             <div class="call-controls" id="call-controls" style="display:none;">
-                <button class="btn-success btn-small" id="start-call-btn" onclick="initiateCall()">📞 Start Call</button>
+                <button class="btn-success btn-small" id="start-call-btn" onclick="window.initiateCall()">📞 Start Call</button>
             </div>
         </div>
         
         <!-- Discord Call Grid Screen -->
         <div id="call-screen">
             <div class="call-grid">
-                <!-- Local User Card -->
                 <div class="participant-card" id="local-card">
                     <div class="participant-avatar" id="local-avatar">?</div>
                     <video id="local-video" class="participant-video" autoplay muted></video>
                     <div class="participant-name" id="local-name-label">You</div>
                 </div>
-                <!-- Remote User Card -->
                 <div class="participant-card" id="remote-card">
                     <div class="participant-avatar" id="remote-avatar">?</div>
                     <video id="remote-video" class="participant-video" autoplay></video>
                     <div class="participant-name" id="remote-name-label">User</div>
                 </div>
             </div>
-            <!-- In-Call Toolbar -->
             <div class="call-toolbar">
-                <button class="btn-primary btn-small" id="cam-toggle-btn" onclick="toggleCamera()">📷 Cam Off</button>
-                <button class="btn-warning btn-small" id="screen-toggle-btn" onclick="toggleScreenShare()" style="color:black;">📺 Share Screen</button>
-                <button class="btn-danger btn-small" onclick="endCall()">🛑 Disconnect</button>
+                <button class="btn-primary btn-small" id="cam-toggle-btn" onclick="window.toggleCamera()">📷 Cam Off</button>
+                <button class="btn-warning btn-small" id="screen-toggle-btn" onclick="window.toggleScreenShare()" style="color:black;">📺 Share Screen</button>
+                <button class="btn-danger btn-small" onclick="window.endCall()">🛑 Disconnect</button>
             </div>
         </div>
 
@@ -257,9 +253,9 @@
         <div id="rules-content" style="display:none; padding: 20px;"><h2>Server Rules</h2><ol><li>No slurs or offensive language.</li><li>No NSFW content.</li><li>Be respectful.</li></ol></div>
 
         <div class="input-area" id="input-area">
-            <input type="file" id="image-file-input" accept="image/*" style="display: none;" onchange="handleImageUpload(event)">
+            <input type="file" id="image-file-input" accept="image/*" style="display: none;" onchange="window.handleImageUpload(event)">
             <button class="upload-btn" onclick="document.getElementById('image-file-input').click()" title="Send Image">📷</button>
-            <input type="text" class="chat-input" id="message-input" placeholder="Message..." onkeypress="handleKeyPress(event)">
+            <input type="text" class="chat-input" id="message-input" placeholder="Message..." onkeypress="window.handleKeyPress(event)">
         </div>
     </div>
 
@@ -269,7 +265,7 @@
             <h2>Friends</h2>
             <div class="add-friend-box">
                 <input type="text" id="add-friend-input" placeholder="Enter username to add friend">
-                <button class="btn-primary" onclick="sendFriendRequest()">Send Request</button>
+                <button class="btn-primary" onclick="window.sendFriendRequest()">Send Request</button>
             </div>
         </div>
         <div style="display:flex; gap: 30px;">
@@ -351,7 +347,6 @@
 
         setInterval(() => {
             if (audioCtx.state === 'suspended') return;
-            // Local check
             if (micAnalyser) {
                 const data = new Uint8Array(micAnalyser.frequencyBinCount);
                 micAnalyser.getByteFrequencyData(data);
@@ -362,7 +357,6 @@
                 if (avg > 12) { card.classList.add('speaking'); avatar.classList.add('speaking'); }
                 else { card.classList.remove('speaking'); avatar.classList.remove('speaking'); }
             }
-            // Remote check
             if (remoteAnalyser) {
                 const data = new Uint8Array(remoteAnalyser.frequencyBinCount);
                 remoteAnalyser.getByteFrequencyData(data);
@@ -405,7 +399,7 @@
                     document.getElementById("display-name").innerText = myName;
                     document.getElementById("my-footer-avatar").innerText = myName.charAt(0).toUpperCase();
                     set(ref(db, 'users/' + myName + '/online'), true);
-                    setupVoiceCalling(); startGlobalListeners(); switchToPublic();
+                    setupVoiceCalling(); startGlobalListeners(); window.switchToPublic();
                 }
             }).catch(() => { errorDiv.innerText = "Database error."; errorDiv.style.display = "block"; });
         }
@@ -507,7 +501,6 @@
                 try {
                     const camStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
                     const videoTrack = camStream.getVideoTracks()[0];
-                    
                     const sender = activeCall.peerConnection.getSenders().find(s => s.track.kind === 'video');
                     if(sender) sender.replaceTrack(videoTrack);
                     
@@ -519,8 +512,6 @@
                     document.getElementById('screen-toggle-btn').innerText = "📺 Share Screen";
                 } catch(e) { alert("Could not access camera."); }
             } else {
-                const audioOnlyStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
-                const audioTrack = audioOnlyStream.getAudioTracks()[0];
                 const sender = activeCall.peerConnection.getSenders().find(s => s.track.kind === 'video');
                 if(sender) sender.replaceTrack(null);
 
@@ -541,7 +532,6 @@
                 try {
                     const screenStream = await navigator.mediaDevices.getDisplayMedia({ video: true });
                     const videoTrack = screenStream.getVideoTracks()[0];
-                    
                     const sender = activeCall.peerConnection.getSenders().find(s => s.track.kind === 'video');
                     if(sender) sender.replaceTrack(videoTrack);
 
@@ -552,7 +542,7 @@
                     document.getElementById('screen-toggle-btn').innerText = "📺 Stop Sharing";
                     document.getElementById('cam-toggle-btn').innerText = "📷 Cam Off";
 
-                    videoTrack.onended = () => { toggleScreenShare(); };
+                    videoTrack.onended = () => { window.toggleScreenShare(); };
                 } catch(e) {}
             } else {
                 const sender = activeCall.peerConnection.getSenders().find(s => s.track.kind === 'video');
@@ -578,7 +568,6 @@
             
             document.getElementById('local-name-label').innerText = myName;
             document.getElementById('local-avatar').innerText = myName.charAt(0).toUpperCase();
-            
             document.getElementById('remote-name-label').innerText = remoteUser;
             document.getElementById('remote-avatar').innerText = remoteUser.charAt(0).toUpperCase();
         }
@@ -677,10 +666,12 @@
             });
         }
         window.acceptFriend = function(target) {
-            set(ref(db, `users/${myName}/friends/${target}`), "accepted"); set(ref(db, `users/${target}/friends/${myName}`), "accepted");
+            set(ref(db, `users/${myName}/friends/${target}`), "accepted"); 
+            set(ref(db, `users/${target}/friends/${myName}`), "accepted");
         }
         window.removeFriend = function(target) {
-            remove(ref(db, `users/${myName}/friends/${target}`)); remove(ref(db, `users/${target}/friends/${myName}`));
+            remove(ref(db, `users/${myName}/friends/${target}`)); 
+            remove(ref(db, `users/${target}/friends/${myName}`));
         }
 
         window.openCreateGroupModal = function() {
@@ -705,12 +696,12 @@
             for(let f in myFriends) {
                 const status = myFriends[f];
                 if(status === "pending_incoming") {
-                    pendList.innerHTML += `<div class="friend-row"><span>👤 ${f}</span><div class="friend-actions"><button class="btn-success btn-small" onclick="acceptFriend('${f}')">✓</button><button class="btn-danger btn-small" onclick="removeFriend('${f}')">✖</button></div></div>`;
+                    pendList.innerHTML += `<div class="friend-row"><span>👤 ${f}</span><div class="friend-actions"><button class="btn-success btn-small" onclick="window.acceptFriend('${f}')">✓</button><button class="btn-danger btn-small" onclick="window.removeFriend('${f}')">✖</button></div></div>`;
                 } else if(status === "pending_outgoing") {
-                    pendList.innerHTML += `<div class="friend-row"><span>👤 ${f} (Pending)</span><button class="btn-danger btn-small" onclick="removeFriend('${f}')">Cancel</button></div>`;
+                    pendList.innerHTML += `<div class="friend-row"><span>👤 ${f} (Pending)</span><button class="btn-danger btn-small" onclick="window.removeFriend('${f}')">Cancel</button></div>`;
                 } else if(status === "accepted") {
                     const isOnline = onlineUsers[f] && onlineUsers[f].online ? '🟢' : '⚪';
-                    accList.innerHTML += `<div class="friend-row"><span>${isOnline} ${f}</span><div class="friend-actions"><button class="btn-primary btn-small" onclick="switchToDM('${f}')">Message</button><button class="btn-danger btn-small" onclick="removeFriend('${f}')">Remove</button></div></div>`;
+                    accList.innerHTML += `<div class="friend-row"><span>${isOnline} ${f}</span><div class="friend-actions"><button class="btn-primary btn-small" onclick="window.switchToDM('${f}')">Message</button><button class="btn-danger btn-small" onclick="window.removeFriend('${f}')">Remove</button></div></div>`;
                 }
             }
             if(pendList.innerHTML === '') pendList.innerHTML = '<div style="color:var(--text-muted); font-size:12px;">No pending requests.</div>';
@@ -742,13 +733,13 @@
             let genBadge = unreadCounts.general > 0 ? `<div class="channel-badge" style="display:block;">${unreadCounts.general}</div>` : '';
             
             document.getElementById("channel-list").innerHTML = `
-                <div class="channel ${currentChannelId === 'general' ? 'active' : ''}" onclick="switchToPublic('general')"><div class="channel-left"># general</div> ${genBadge}</div>
-                <div class="channel ${currentChannelId === 'rules' ? 'active' : ''}" onclick="switchToPublic('rules')"><div class="channel-left"># rules</div></div>
+                <div class="channel ${currentChannelId === 'general' ? 'active' : ''}" onclick="window.switchToPublic('general')"><div class="channel-left"># general</div> ${genBadge}</div>
+                <div class="channel ${currentChannelId === 'rules' ? 'active' : ''}" onclick="window.switchToPublic('rules')"><div class="channel-left"># rules</div></div>
             `;
             const memList = document.getElementById("member-list-ui");
             memList.innerHTML = '<div style="font-size: 12px; font-weight: bold; margin-bottom: 10px; color: var(--text-muted);">ONLINE</div>';
             for (let u in onlineUsers) {
-                if(onlineUsers[u].online) memList.innerHTML += `<div class="member" onclick="switchToDM('${u}')"><div class="user-avatar-sm" style="width:24px;height:24px;font-size:11px;">${u.charAt(0).toUpperCase()}</div>${u}</div>`;
+                if(onlineUsers[u].online) memList.innerHTML += `<div class="member" onclick="window.switchToDM('${u}')"><div class="user-avatar-sm" style="width:24px;height:24px;font-size:11px;">${u.charAt(0).toUpperCase()}</div>${u}</div>`;
             }
         }
 
@@ -756,20 +747,20 @@
             document.getElementById("sidebar-title").innerText = "Direct Messages";
             document.getElementById("add-group-btn").style.display = "block";
             
-            let html = `<div class="channel ${viewContext === 'friends' ? 'active' : ''}" onclick="switchToFriendsHome()" style="margin-bottom:15px;"><div class="channel-left">👋 Friends Dashboard</div></div>`;
+            let html = `<div class="channel ${viewContext === 'friends' ? 'active' : ''}" onclick="window.switchToFriendsHome()" style="margin-bottom:15px;"><div class="channel-left">👋 Friends Dashboard</div></div>`;
             
             html += '<div style="font-size: 11px; font-weight: bold; margin-bottom: 8px; color: var(--text-muted); padding: 4px;">DIRECT MESSAGES</div>';
             for(let f in myFriends) {
                 if(myFriends[f] === "accepted") {
                     let uBadge = (unreadCounts.dms[f] > 0) ? `<div class="channel-badge" style="display:block;">${unreadCounts.dms[f]}</div>` : '';
-                    html += `<div class="channel ${(viewContext === 'dm' && currentChannelId === f) ? 'active' : ''}" onclick="switchToDM('${f}')"><div class="channel-left"><div class="user-avatar-sm" style="width:24px;height:24px;font-size:11px;">${f.charAt(0).toUpperCase()}</div> ${f}</div> ${uBadge}</div>`;
+                    html += `<div class="channel ${(viewContext === 'dm' && currentChannelId === f) ? 'active' : ''}" onclick="window.switchToDM('${f}')"><div class="channel-left"><div class="user-avatar-sm" style="width:24px;height:24px;font-size:11px;">${f.charAt(0).toUpperCase()}</div> ${f}</div> ${uBadge}</div>`;
                 }
             }
             
             html += '<div style="font-size: 11px; font-weight: bold; margin-top: 15px; margin-bottom: 8px; color: var(--text-muted); padding: 4px;">GROUP CHATS</div>';
             for(let g in myGroups) {
                 let gBadge = (unreadCounts.groups[g] > 0) ? `<div class="channel-badge" style="display:block;">${unreadCounts.groups[g]}</div>` : '';
-                html += `<div class="channel ${(viewContext === 'group' && currentChannelId === g) ? 'active' : ''}" onclick="switchToGroup('${g}')"><div class="channel-left">👥 ${myGroups[g].name}</div> ${gBadge}</div>`;
+                html += `<div class="channel ${(viewContext === 'group' && currentChannelId === g) ? 'active' : ''}" onclick="window.switchToGroup('${g}')"><div class="channel-left">👥 ${myGroups[g].name}</div> ${gBadge}</div>`;
             }
             document.getElementById("channel-list").innerHTML = html;
         }
@@ -807,7 +798,7 @@
             if (targetUser === myName) return;
             if (!myFriends[targetUser] || myFriends[targetUser] !== "accepted") {
                 if(!confirm(`Send friend request to ${targetUser}?`)) return;
-                sendFriendRequest(targetUser); return;
+                window.sendFriendRequest(targetUser); return;
             }
             
             viewContext = "dm"; currentChannelId = targetUser;
@@ -837,7 +828,7 @@
             renderMessages(grp.messages || {}, 'group', groupId);
             
             let memUI = `<div style="font-size: 12px; font-weight: bold; margin-bottom: 10px; color: var(--text-muted);">MEMBERS</div>`;
-            for(let m in grp.members) memUI += `<div class="member" onclick="switchToDM('${m}')"><div class="user-avatar-sm" style="width:24px;height:24px;font-size:11px;">${m.charAt(0).toUpperCase()}</div>${m}</div>`;
+            for(let m in grp.members) memUI += `<div class="member" onclick="window.switchToDM('${m}')"><div class="user-avatar-sm" style="width:24px;height:24px;font-size:11px;">${m.charAt(0).toUpperCase()}</div>${m}</div>`;
             document.getElementById("member-list-ui").innerHTML = memUI;
         }
 
@@ -869,7 +860,7 @@
         const savedPass = localStorage.getItem("chatPassword");
         if (localStorage.getItem("chatTheme") === "light") document.body.setAttribute("data-theme", "light");
         if (savedName && savedPass) {
-            setTimeout(() => { document.getElementById("login-username").value = savedName; document.getElementById("login-password").value = savedPass; attemptLogin(); }, 100);
+            setTimeout(() => { document.getElementById("login-username").value = savedName; document.getElementById("login-password").value = savedPass; window.attemptLogin(); }, 100);
         }
     </script>
 </body>
