@@ -335,6 +335,7 @@
 
         let isCamActive = false;
         let isScreenActive = false;
+        let screenStream = null;
         let micAnalyser = null;
         let remoteAnalyser = null;
         let inCallScreenView = false;
@@ -458,7 +459,12 @@
             switchToDM(activeCallRemoteUser);
 
             try {
-                localStream = await navigator.mediaDevices.getUserMedia({ audio: selectedMicId === 'default' ? true : { deviceId: { exact: selectedMicId } }, video: true });
+                // Request audio & video so WebRTC negotiates the video channel right away, but keep camera track disabled initially
+                localStream = await navigator.mediaDevices.getUserMedia({
+                    audio: selectedMicId === 'default' ? true : { deviceId: { exact: selectedMicId } },
+                    video: true
+                });
+                localStream.getVideoTracks()[0].enabled = false; // Camera is OFF by default
                 setupAudioAnalyser(localStream, true);
                 
                 incomingCallObj.answer(localStream);
@@ -486,7 +492,11 @@
             if (viewContext !== "dm" || !currentChannelId) return;
             activeCallRemoteUser = currentChannelId;
             try {
-                localStream = await navigator.mediaDevices.getUserMedia({ audio: selectedMicId === 'default' ? true : { deviceId: { exact: selectedMicId } }, video: true });
+                localStream = await navigator.mediaDevices.getUserMedia({
+                    audio: selectedMicId === 'default' ? true : { deviceId: { exact: selectedMicId } },
+                    video: true
+                });
+                localStream.getVideoTracks()[0].enabled = false; // Camera is OFF by default
                 setupAudioAnalyser(localStream, true);
 
                 const call = peer.call(activeCallRemoteUser, localStream);
@@ -506,31 +516,22 @@
             } catch(err) { alert("Media access required."); }
         }
 
-        async function toggleCamera() {
-            if(!activeCall) return;
+        function toggleCamera() {
+            if(!activeCall || !localStream) return;
             const localVideo = document.getElementById('local-video');
             const localAvatar = document.getElementById('local-avatar');
+            const videoTrack = localStream.getVideoTracks()[0];
 
             if (!isCamActive) {
-                try {
-                    const camStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-                    const videoTrack = camStream.getVideoTracks()[0];
-                    const sender = activeCall.peerConnection.getSenders().find(s => s.track && s.track.kind === 'video');
-                    if(sender) sender.replaceTrack(videoTrack);
-                    
-                    localVideo.srcObject = camStream;
-                    localVideo.onloadedmetadata = () => {
-                        localVideo.style.display = 'block';
-                        localAvatar.style.display = 'none';
-                    };
-                    isCamActive = true; isScreenActive = false;
-                    document.getElementById('cam-toggle-btn').innerText = "📷 Cam On";
-                    document.getElementById('screen-toggle-btn').innerText = "📺 Share Screen";
-                } catch(e) { alert("Could not access camera."); }
+                if (isScreenActive) toggleScreenShare(); // turn off screen share if active
+                videoTrack.enabled = true;
+                localVideo.srcObject = localStream;
+                localVideo.style.display = 'block';
+                localAvatar.style.display = 'none';
+                isCamActive = true;
+                document.getElementById('cam-toggle-btn').innerText = "📷 Cam On";
             } else {
-                const sender = activeCall.peerConnection.getSenders().find(s => s.track && s.track.kind === 'video');
-                if(sender) sender.replaceTrack(null);
-
+                videoTrack.enabled = false;
                 localVideo.srcObject = null;
                 localVideo.style.display = 'none';
                 localAvatar.style.display = 'flex';
@@ -540,31 +541,41 @@
         }
 
         async function toggleScreenShare() {
-            if(!activeCall) return;
+            if(!activeCall || !localStream) return;
             const localVideo = document.getElementById('local-video');
             const localAvatar = document.getElementById('local-avatar');
+            const videoSender = activeCall.peerConnection.getSenders().find(s => s.track && s.track.kind === 'video');
 
             if (!isScreenActive) {
                 try {
-                    const screenStream = await navigator.mediaDevices.getDisplayMedia({ video: true });
-                    const videoTrack = screenStream.getVideoTracks()[0];
-                    const sender = activeCall.peerConnection.getSenders().find(s => s.track && s.track.kind === 'video');
-                    if(sender) sender.replaceTrack(videoTrack);
+                    screenStream = await navigator.mediaDevices.getDisplayMedia({ video: true });
+                    const screenTrack = screenStream.getVideoTracks()[0];
+
+                    if (videoSender) {
+                        await videoSender.replaceTrack(screenTrack);
+                    }
 
                     localVideo.srcObject = screenStream;
-                    localVideo.onloadedmetadata = () => {
-                        localVideo.style.display = 'block';
-                        localAvatar.style.display = 'none';
-                    };
-                    isScreenActive = true; isCamActive = false;
+                    localVideo.style.display = 'block';
+                    localAvatar.style.display = 'none';
+                    isScreenActive = true;
+                    isCamActive = false;
                     document.getElementById('screen-toggle-btn').innerText = "📺 Stop Sharing";
                     document.getElementById('cam-toggle-btn').innerText = "📷 Cam Off";
+                    localStream.getVideoTracks()[0].enabled = false;
 
-                    videoTrack.onended = () => { toggleScreenShare(); };
+                    screenTrack.onended = () => { toggleScreenShare(); };
                 } catch(e) {}
             } else {
-                const sender = activeCall.peerConnection.getSenders().find(s => s.track && s.track.kind === 'video');
-                if(sender) sender.replaceTrack(null);
+                if (screenStream) {
+                    screenStream.getTracks().forEach(t => t.stop());
+                    screenStream = null;
+                }
+                const cameraVideoTrack = localStream.getVideoTracks()[0];
+                if (videoSender) {
+                    await videoSender.replaceTrack(cameraVideoTrack);
+                }
+                cameraVideoTrack.enabled = false;
 
                 localVideo.srcObject = null;
                 localVideo.style.display = 'none';
@@ -607,6 +618,7 @@
             activeCall = null; isCamActive = false; isScreenActive = false; inCallScreenView = false;
             activeCallRemoteUser = "";
             if (localStream) localStream.getTracks().forEach(t => t.stop());
+            if (screenStream) screenStream.getTracks().forEach(t => t.stop());
             document.getElementById('remote-audio').srcObject = null;
             
             document.getElementById("call-screen").style.display = "none";
