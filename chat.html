@@ -37,7 +37,6 @@
 
         body { margin: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: var(--bg-chat); color: var(--text-main); display: flex; height: 100vh; overflow: hidden; }
 
-        /* Overlays & Modals */
         .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.7); z-index: 9999; display: flex; justify-content: center; align-items: center; }
         #login-overlay { background-color: #808080; }
         
@@ -57,11 +56,9 @@
         .settings-group { display: flex; flex-direction: column; gap: 5px; }
         .settings-group label { font-size: 12px; font-weight: bold; color: var(--text-muted); text-transform: uppercase; }
 
-        /* Badges */
         .server-badge { background-color: var(--error); color: white; border-radius: 50%; padding: 2px 6px; font-size: 10px; position: absolute; top: -5px; right: -5px; display: none; font-weight: bold; box-shadow: 0 0 5px rgba(0,0,0,0.5); }
         .channel-badge { background-color: var(--error); color: white; border-radius: 10px; padding: 2px 6px; font-size: 10px; font-weight: bold; }
 
-        /* General Layout */
         .server-bar { width: 72px; background-color: var(--bg-server); display: flex; flex-direction: column; align-items: center; padding-top: 12px; gap: 10px; flex-shrink: 0; }
         .server-icon { position: relative; width: 48px; height: 48px; background-color: var(--bg-chat); border-radius: 50%; display: flex; justify-content: center; align-items: center; cursor: pointer; transition: 0.2s; font-weight: bold; }
         .server-icon:hover, .active-server { border-radius: 16px; background-color: var(--accent); color: white; }
@@ -73,7 +70,8 @@
         .channel-left { display: flex; align-items: center; gap: 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .channel:hover, .channel.active { background-color: var(--hover); color: var(--text-main); }
         
-        .settings-bar { padding: 10px; background-color: var(--bg-server); display: flex; justify-content: space-between; align-items: center; }
+        .settings-bar { padding: 10px; background-color: var(--bg-server); display: flex; justify-content: space-between; align-items: center; flex-direction: column; gap: 8px; }
+        .settings-row { display: flex; justify-content: space-between; width: 100%; align-items: center; }
         .settings-btn { background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 18px; transition: 0.2s;}
         .settings-btn:hover { color: var(--text-main); }
 
@@ -132,6 +130,9 @@
         .checkbox-list { max-height: 150px; overflow-y: auto; background: var(--bg-darker); border-radius: 4px; padding: 5px; }
         .checkbox-list label { display: flex; align-items: center; gap: 10px; padding: 5px; cursor: pointer; }
         .checkbox-list label:hover { background: var(--hover); }
+        
+        /* Active Call Banner in Sidebar */
+        #active-call-banner { display: none; background-color: var(--success); color: white; padding: 8px; border-radius: 6px; text-align: center; font-weight: bold; cursor: pointer; font-size: 13px; width: 100%; box-sizing: border-box; }
     </style>
 </head>
 <body>
@@ -207,13 +208,16 @@
         </div>
         <div class="channel-list" id="channel-list"></div>
         <div class="settings-bar">
-            <div style="display:flex; align-items:center; gap:8px;">
-                <div class="user-avatar-sm" id="my-footer-avatar">?</div>
-                <span id="display-name" style="font-weight:bold; font-size:14px;">Loading...</span>
-            </div>
-            <div>
-                <button class="settings-btn" id="open-settings-btn" title="Settings">⚙️</button>
-                <button class="settings-btn" id="logout-btn" title="Logout">🚪</button>
+            <div id="active-call-banner">🟢 In Call (Return)</div>
+            <div class="settings-row">
+                <div style="display:flex; align-items:center; gap:8px;">
+                    <div class="user-avatar-sm" id="my-footer-avatar">?</div>
+                    <span id="display-name" style="font-weight:bold; font-size:14px;">Loading...</span>
+                </div>
+                <div>
+                    <button class="settings-btn" id="open-settings-btn" title="Settings">⚙️</button>
+                    <button class="settings-btn" id="logout-btn" title="Logout">🚪</button>
+                </div>
             </div>
         </div>
     </div>
@@ -224,6 +228,7 @@
             <div style="display: flex; align-items: center; gap: 10px;" id="chat-header-text"># general</div>
             <div class="call-controls" id="call-controls" style="display:none;">
                 <button class="btn-success btn-small" id="start-call-btn">📞 Start Call</button>
+                <button class="btn-primary btn-small" id="return-call-btn" style="display:none;">📺 Return to Call</button>
             </div>
         </div>
         
@@ -332,6 +337,8 @@
         let isScreenActive = false;
         let micAnalyser = null;
         let remoteAnalyser = null;
+        let inCallScreenView = false;
+        let activeCallRemoteUser = "";
 
         // --- AUDIO METER (SPEAKING GLOW DETECTOR) ---
         function setupAudioAnalyser(stream, isLocal) {
@@ -447,8 +454,11 @@
             document.getElementById('call-notification').style.display = 'none'; stopRinging(); playJoin();
             if(!incomingCallObj) return;
 
+            activeCallRemoteUser = incomingCallObj.peer;
+            switchToDM(activeCallRemoteUser);
+
             try {
-                localStream = await navigator.mediaDevices.getUserMedia({ audio: selectedMicId === 'default' ? true : { deviceId: { exact: selectedMicId } }, video: false });
+                localStream = await navigator.mediaDevices.getUserMedia({ audio: selectedMicId === 'default' ? true : { deviceId: { exact: selectedMicId } }, video: true });
                 setupAudioAnalyser(localStream, true);
                 
                 incomingCallObj.answer(localStream);
@@ -457,12 +467,14 @@
                     setupAudioAnalyser(remoteStream, false);
                     const remoteVideo = document.getElementById('remote-video');
                     remoteVideo.srcObject = remoteStream;
-                    remoteVideo.style.display = 'block';
-                    document.getElementById('remote-avatar').style.display = 'none';
+                    remoteVideo.onloadedmetadata = () => {
+                        remoteVideo.style.display = 'block';
+                        document.getElementById('remote-avatar').style.display = 'none';
+                    };
                 });
-                activeCall = incomingCallObj; showCallScreen(incomingCallObj.peer);
+                activeCall = incomingCallObj; showCallScreen(activeCallRemoteUser);
                 incomingCallObj.on('close', resetCallUI);
-            } catch(e) { alert("Microphone access required."); resetCallUI(); }
+            } catch(e) { alert("Media access required."); resetCallUI(); }
         }
 
         function declineCall() {
@@ -472,23 +484,26 @@
 
         async function initiateCall() {
             if (viewContext !== "dm" || !currentChannelId) return;
+            activeCallRemoteUser = currentChannelId;
             try {
-                localStream = await navigator.mediaDevices.getUserMedia({ audio: selectedMicId === 'default' ? true : { deviceId: { exact: selectedMicId } }, video: false });
+                localStream = await navigator.mediaDevices.getUserMedia({ audio: selectedMicId === 'default' ? true : { deviceId: { exact: selectedMicId } }, video: true });
                 setupAudioAnalyser(localStream, true);
 
-                const call = peer.call(currentChannelId, localStream);
+                const call = peer.call(activeCallRemoteUser, localStream);
                 call.on('stream', (remoteStream) => {
                     playJoin();
                     document.getElementById('remote-audio').srcObject = remoteStream;
                     setupAudioAnalyser(remoteStream, false);
                     const remoteVideo = document.getElementById('remote-video');
                     remoteVideo.srcObject = remoteStream;
-                    remoteVideo.style.display = 'block';
-                    document.getElementById('remote-avatar').style.display = 'none';
+                    remoteVideo.onloadedmetadata = () => {
+                        remoteVideo.style.display = 'block';
+                        document.getElementById('remote-avatar').style.display = 'none';
+                    };
                 });
                 call.on('close', resetCallUI);
-                activeCall = call; showCallScreen(currentChannelId);
-            } catch(err) { alert("Microphone access required."); }
+                activeCall = call; showCallScreen(activeCallRemoteUser);
+            } catch(err) { alert("Media access required."); }
         }
 
         async function toggleCamera() {
@@ -504,8 +519,10 @@
                     if(sender) sender.replaceTrack(videoTrack);
                     
                     localVideo.srcObject = camStream;
-                    localVideo.style.display = 'block';
-                    localAvatar.style.display = 'none';
+                    localVideo.onloadedmetadata = () => {
+                        localVideo.style.display = 'block';
+                        localAvatar.style.display = 'none';
+                    };
                     isCamActive = true; isScreenActive = false;
                     document.getElementById('cam-toggle-btn').innerText = "📷 Cam On";
                     document.getElementById('screen-toggle-btn').innerText = "📺 Share Screen";
@@ -535,8 +552,10 @@
                     if(sender) sender.replaceTrack(videoTrack);
 
                     localVideo.srcObject = screenStream;
-                    localVideo.style.display = 'block';
-                    localAvatar.style.display = 'none';
+                    localVideo.onloadedmetadata = () => {
+                        localVideo.style.display = 'block';
+                        localAvatar.style.display = 'none';
+                    };
                     isScreenActive = true; isCamActive = false;
                     document.getElementById('screen-toggle-btn').innerText = "📺 Stop Sharing";
                     document.getElementById('cam-toggle-btn').innerText = "📷 Cam Off";
@@ -561,9 +580,13 @@
         }
 
         function showCallScreen(remoteUser) {
+            inCallScreenView = true;
             document.getElementById("messages").style.display = "none";
             document.getElementById("input-area").style.display = "none";
             document.getElementById("call-screen").style.display = "flex";
+            document.getElementById("active-call-banner").style.display = "block";
+            document.getElementById("return-call-btn").style.display = "inline-block";
+            document.getElementById("start-call-btn").style.display = "none";
             
             document.getElementById('local-name-label').innerText = myName;
             document.getElementById('local-avatar').innerText = myName.charAt(0).toUpperCase();
@@ -571,14 +594,30 @@
             document.getElementById('remote-avatar').innerText = remoteUser.charAt(0).toUpperCase();
         }
 
+        function hideCallScreen() {
+            inCallScreenView = false;
+            document.getElementById("call-screen").style.display = "none";
+            if (viewContext === "dm" && currentChannelId !== "") {
+                document.getElementById("messages").style.display = "flex";
+                document.getElementById("input-area").style.display = "flex";
+            }
+        }
+
         function resetCallUI() {
-            activeCall = null; isCamActive = false; isScreenActive = false;
+            activeCall = null; isCamActive = false; isScreenActive = false; inCallScreenView = false;
+            activeCallRemoteUser = "";
             if (localStream) localStream.getTracks().forEach(t => t.stop());
             document.getElementById('remote-audio').srcObject = null;
             
             document.getElementById("call-screen").style.display = "none";
-            document.getElementById("messages").style.display = "flex";
-            document.getElementById("input-area").style.display = "flex";
+            document.getElementById("active-call-banner").style.display = "none";
+            document.getElementById("return-call-btn").style.display = "none";
+            
+            if (viewContext === "dm") {
+                document.getElementById("messages").style.display = "flex";
+                document.getElementById("input-area").style.display = "flex";
+                document.getElementById('start-call-btn').style.display = 'inline-block';
+            }
             document.getElementById('local-video').style.display = 'none';
             document.getElementById('remote-video').style.display = 'none';
             document.getElementById('local-avatar').style.display = 'flex';
@@ -688,7 +727,7 @@
             document.getElementById('create-group-modal').style.display = 'none';
         }
 
-        // --- RENDERING (USING DOM OBJECTS INSTEAD OF INLINE STRINGS) ---
+        // --- RENDERING ---
         function renderFriendsDashboard() {
             const pendList = document.getElementById("pending-friends-list"); const accList = document.getElementById("accepted-friends-list");
             pendList.innerHTML = ''; accList.innerHTML = '';
@@ -816,14 +855,15 @@
         // --- NAVIGATION ---
         function setMainVisibility(showChat, showFriends, showRules) {
             document.getElementById("chat-area").style.display = showChat || showRules ? "flex" : "none";
-            document.getElementById("messages").style.display = showChat ? "flex" : "none";
-            document.getElementById("input-area").style.display = showChat ? "flex" : "none";
+            document.getElementById("messages").style.display = (showChat && !inCallScreenView) ? "flex" : "none";
+            document.getElementById("input-area").style.display = (showChat && !inCallScreenView) ? "flex" : "none";
             document.getElementById("rules-content").style.display = showRules ? "block" : "none";
             document.getElementById("friends-dashboard").style.display = showFriends ? "block" : "none";
             if(showFriends) renderFriendsDashboard();
         }
 
         function switchToPublic(channel = 'general') {
+            hideCallScreen();
             viewContext = "public"; currentChannelId = channel;
             if (channel === 'general') { unreadCounts.general = 0; updateBadges(); }
             document.getElementById("pub-icon").classList.add("active-server"); document.getElementById("dm-icon").classList.remove("active-server");
@@ -835,6 +875,7 @@
         }
 
         function switchToFriendsHome() {
+            hideCallScreen();
             viewContext = "friends"; currentChannelId = "";
             document.getElementById("pub-icon").classList.remove("active-server"); document.getElementById("dm-icon").classList.add("active-server");
             document.getElementById("call-controls").style.display = "none";
@@ -854,6 +895,15 @@
             document.getElementById("pub-icon").classList.remove("active-server"); document.getElementById("dm-icon").classList.add("active-server");
             
             document.getElementById("call-controls").style.display = "flex";
+            if(activeCall && activeCallRemoteUser === targetUser) {
+                document.getElementById("start-call-btn").style.display = "none";
+                document.getElementById("return-call-btn").style.display = "inline-block";
+            } else {
+                document.getElementById("start-call-btn").style.display = "inline-block";
+                document.getElementById("return-call-btn").style.display = "none";
+                hideCallScreen();
+            }
+
             renderDMSidebar(); setMainVisibility(true, false, false);
             document.getElementById("chat-header-text").innerText = `@ ${targetUser}`;
             document.getElementById("message-input").placeholder = `Message @${targetUser}`;
@@ -865,6 +915,7 @@
         }
 
         function switchToGroup(groupId) {
+            hideCallScreen();
             viewContext = "group"; currentChannelId = groupId;
             unreadCounts.groups[groupId] = 0; updateBadges();
             document.getElementById("pub-icon").classList.remove("active-server"); document.getElementById("dm-icon").classList.add("active-server");
@@ -930,6 +981,8 @@
         document.getElementById("submit-group-btn").onclick = submitCreateGroup;
         document.getElementById("send-friend-btn").onclick = sendFriendRequest;
         document.getElementById("start-call-btn").onclick = initiateCall;
+        document.getElementById("return-call-btn").onclick = () => { if(activeCallRemoteUser) { switchToDM(activeCallRemoteUser); showCallScreen(activeCallRemoteUser); } };
+        document.getElementById("active-call-banner").onclick = () => { if(activeCallRemoteUser) { switchToDM(activeCallRemoteUser); showCallScreen(activeCallRemoteUser); } };
         document.getElementById("cam-toggle-btn").onclick = toggleCamera;
         document.getElementById("screen-toggle-btn").onclick = toggleScreenShare;
         document.getElementById("end-call-btn").onclick = endCall;
