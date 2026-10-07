@@ -16,6 +16,7 @@
             --accent: #5865F2;
             --hover: #3f4147;
             --error: #da373c;
+            --success: #23a559;
         }
 
         [data-theme="light"] {
@@ -27,6 +28,7 @@
             --accent: #5865F2;
             --hover: #e0e1e5;
             --error: #da373c;
+            --success: #23a559;
         }
 
         body {
@@ -39,314 +41,189 @@
             overflow: hidden;
         }
 
-        /* Login Overlay */
-        #login-overlay {
+        /* Overlays & Modals */
+        .overlay {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
-            background-color: var(--bg-server);
+            background-color: rgba(0, 0, 0, 0.7);
             z-index: 9999;
             display: flex;
             justify-content: center;
             align-items: center;
         }
-        .login-box {
+        .modal-box {
             background-color: var(--bg-chat);
-            padding: 40px;
+            padding: 30px;
             border-radius: 8px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-            text-align: center;
-            width: 300px;
-        }
-        .login-box input {
-            width: 100%;
-            padding: 10px;
-            margin-bottom: 15px;
-            background-color: var(--bg-sidebar);
-            border: none;
-            color: var(--text-main);
-            border-radius: 4px;
-            box-sizing: border-box;
-            outline: none;
-        }
-        .login-box button {
-            width: 100%;
-            padding: 10px;
-            background-color: var(--accent);
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-weight: bold;
-            transition: 0.2s;
-        }
-        .login-box button:hover {
-            background-color: #4752c4;
-        }
-        #login-error {
-            color: var(--error);
-            margin-top: 10px;
-            font-size: 14px;
-            display: none;
-        }
-
-        /* Far Left Server Bar */
-        .server-bar {
-            width: 72px;
-            background-color: var(--bg-server);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding-top: 12px;
-            gap: 10px;
-        }
-        .server-icon {
-            width: 48px;
-            height: 48px;
-            background-color: var(--bg-chat);
-            border-radius: 50%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            cursor: pointer;
-            transition: 0.2s;
-            font-weight: bold;
-        }
-        .server-icon:hover {
-            border-radius: 16px;
-            background-color: var(--accent);
-            color: white;
-        }
-        .active-server {
-            border-radius: 16px;
-            background-color: var(--accent);
-            color: white;
-        }
-
-        /* Channel Sidebar */
-        .sidebar {
-            width: 240px;
-            background-color: var(--bg-sidebar);
-            display: flex;
-            flex-direction: column;
-        }
-        .sidebar-header {
-            padding: 16px;
-            font-weight: bold;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.2);
-        }
-        .channel-list {
-            padding: 10px;
-            flex-grow: 1;
-            overflow-y: auto;
-        }
-        .channel {
-            padding: 8px;
-            margin-bottom: 2px;
-            cursor: pointer;
-            border-radius: 4px;
-            color: var(--text-muted);
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        .channel:hover, .channel.active {
-            background-color: var(--hover);
-            color: var(--text-main);
-        }
-        .settings-bar {
-            padding: 10px;
-            background-color: var(--bg-server);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .settings-btn {
-            background: none;
-            border: none;
-            color: var(--text-muted);
-            cursor: pointer;
-            font-size: 16px;
-        }
-
-        /* Main Chat Area */
-        .chat-area {
-            flex-grow: 1;
-            display: flex;
-            flex-direction: column;
-            background-color: var(--bg-chat);
-        }
-        .chat-header {
-            padding: 16px;
-            font-weight: bold;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-        .header-left {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        .call-btn {
-            display: none;
-            background-color: #23a559;
-            color: white;
-            border: none;
-            padding: 6px 12px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-weight: bold;
-            transition: 0.2s;
-        }
-        .call-btn:hover {
-            background-color: #1a7a42;
-        }
-        .messages {
-            flex-grow: 1;
-            padding: 20px;
-            overflow-y: auto;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            width: 320px;
             display: flex;
             flex-direction: column;
             gap: 15px;
         }
-        .message {
-            display: flex;
-            flex-direction: column;
-            padding: 4px 8px;
-            border-radius: 4px;
-            user-select: none;
-        }
-        .message:hover {
-            background-color: rgba(0, 0, 0, 0.05);
-        }
-        .msg-header {
-            display: flex;
-            align-items: baseline;
-            gap: 10px;
-        }
-        .msg-author {
-            font-weight: bold;
-            color: var(--text-main);
-            cursor: pointer;
-        }
-        .msg-author:hover {
-            text-decoration: underline;
-        }
-        .msg-text {
-            margin-top: 5px;
-            word-break: break-word;
-        }
-        .msg-image {
-            max-width: 300px;
-            max-height: 300px;
-            border-radius: 8px;
-            margin-top: 8px;
-            cursor: pointer;
-        }
-        .input-area {
-            padding: 20px;
-            display: flex;
-            gap: 10px;
-            align-items: center;
-        }
-        .chat-input {
-            flex-grow: 1;
+        .modal-box h2, .modal-box h3 { margin-top: 0; }
+        .modal-box input, .modal-box select {
+            width: 100%;
+            padding: 10px;
             background-color: var(--bg-sidebar);
-            border: none;
+            border: 1px solid var(--bg-server);
             color: var(--text-main);
-            padding: 15px;
-            border-radius: 8px;
-            outline: none;
+            border-radius: 4px;
             box-sizing: border-box;
+            outline: none;
         }
-        .upload-btn {
-            background-color: var(--bg-sidebar);
-            color: var(--text-muted);
-            border: none;
-            width: 48px;
-            height: 48px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: 0.2s;
+        .btn-primary {
+            background-color: var(--accent);
+            color: white; border: none; padding: 10px; border-radius: 4px; cursor: pointer; font-weight: bold; transition: 0.2s;
         }
-        .upload-btn:hover {
-            background-color: var(--hover);
-            color: var(--text-main);
-        }
+        .btn-primary:hover { background-color: #4752c4; }
+        
+        .btn-success { background-color: var(--success); color: white; border: none; padding: 10px; border-radius: 4px; cursor: pointer; font-weight: bold; }
+        .btn-danger { background-color: var(--error); color: white; border: none; padding: 10px; border-radius: 4px; cursor: pointer; font-weight: bold; }
 
-        /* Right Member/Profile List */
-        .member-list {
-            width: 240px;
-            background-color: var(--bg-sidebar);
-            padding: 20px 10px;
-            overflow-y: auto;
-        }
-        .member {
-            padding: 8px;
-            color: var(--text-muted);
-            cursor: pointer;
-            border-radius: 4px;
-        }
-        .member:hover {
-            background-color: var(--hover);
-            color: var(--text-main);
-        }
+        /* Call Notification specific */
+        #call-notification { display: none; }
+        .call-buttons { display: flex; gap: 10px; justify-content: space-between; }
+        .call-buttons button { flex: 1; }
 
-        #rules-content {
-            display: none;
-            padding: 20px;
-        }
+        /* Settings Modal specific */
+        #settings-modal { display: none; }
+        .settings-group { display: flex; flex-direction: column; gap: 5px; }
+        .settings-group label { font-size: 12px; font-weight: bold; color: var(--text-muted); text-transform: uppercase; }
+        .close-btn { background: none; border: none; color: var(--text-muted); cursor: pointer; align-self: flex-end; font-size: 18px; }
+
+        /* General Layout */
+        .server-bar { width: 72px; background-color: var(--bg-server); display: flex; flex-direction: column; align-items: center; padding-top: 12px; gap: 10px; }
+        .server-icon { width: 48px; height: 48px; background-color: var(--bg-chat); border-radius: 50%; display: flex; justify-content: center; align-items: center; cursor: pointer; transition: 0.2s; font-weight: bold; }
+        .server-icon:hover, .active-server { border-radius: 16px; background-color: var(--accent); color: white; }
+
+        .sidebar { width: 240px; background-color: var(--bg-sidebar); display: flex; flex-direction: column; }
+        .sidebar-header { padding: 16px; font-weight: bold; box-shadow: 0 1px 2px rgba(0,0,0,0.2); }
+        .channel-list { padding: 10px; flex-grow: 1; overflow-y: auto; }
+        .channel { padding: 8px; margin-bottom: 2px; cursor: pointer; border-radius: 4px; color: var(--text-muted); display: flex; align-items: center; gap: 8px; }
+        .channel:hover, .channel.active { background-color: var(--hover); color: var(--text-main); }
+        .settings-bar { padding: 10px; background-color: var(--bg-server); display: flex; justify-content: space-between; align-items: center; }
+        .settings-btn { background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 18px; transition: 0.2s;}
+        .settings-btn:hover { color: var(--text-main); }
+
+        .chat-area { flex-grow: 1; display: flex; flex-direction: column; background-color: var(--bg-chat); }
+        .chat-header { padding: 16px; font-weight: bold; box-shadow: 0 1px 2px rgba(0,0,0,0.1); display: flex; align-items: center; justify-content: space-between; }
+        .header-left { display: flex; align-items: center; gap: 10px; }
+        
+        .call-controls { display: none; gap: 10px; }
+        .call-btn { background-color: var(--success); color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-weight: bold; }
+        .end-call-btn { background-color: var(--error); color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-weight: bold; display: none; }
+
+        .messages { flex-grow: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; }
+        .message { display: flex; flex-direction: column; padding: 4px 8px; border-radius: 4px; }
+        .message:hover { background-color: rgba(0, 0, 0, 0.05); }
+        .msg-header { display: flex; align-items: baseline; gap: 10px; }
+        .msg-author { font-weight: bold; color: var(--text-main); cursor: pointer; }
+        .msg-text { margin-top: 5px; word-break: break-word; }
+        .msg-image { max-width: 300px; max-height: 300px; border-radius: 8px; margin-top: 8px; cursor: pointer; }
+
+        .input-area { padding: 20px; display: flex; gap: 10px; align-items: center; }
+        .chat-input { flex-grow: 1; background-color: var(--bg-sidebar); border: none; color: var(--text-main); padding: 15px; border-radius: 8px; outline: none; }
+        .upload-btn { background-color: var(--bg-sidebar); color: var(--text-muted); border: none; width: 48px; height: 48px; border-radius: 8px; cursor: pointer; font-size: 20px; }
+        .member-list { width: 240px; background-color: var(--bg-sidebar); padding: 20px 10px; overflow-y: auto; }
+        .member { padding: 8px; color: var(--text-muted); cursor: pointer; border-radius: 4px; }
+        .member:hover { background-color: var(--hover); color: var(--text-main); }
+        #rules-content { display: none; padding: 20px; }
     </style>
 </head>
 <body>
 
+    <!-- Hidden audio element for voice calls -->
+    <audio id="remote-audio" autoplay></audio>
+
     <!-- Login Overlay -->
-    <div id="login-overlay">
-        <div class="login-box">
-            <h2 style="margin-top:0;">Sign In</h2>
+    <div id="login-overlay" class="overlay">
+        <div class="modal-box">
+            <h2 style="text-align: center;">Sign In</h2>
             <input type="text" id="login-username" placeholder="Username" autocomplete="off">
             <input type="password" id="login-password" placeholder="Password">
-            <button onclick="attemptLogin()">Join Chat</button>
-            <div id="login-error">Invalid password.</div>
-            <p style="font-size:12px; color:var(--text-muted); margin-top:15px;">If the username doesn't exist, it will register automatically.</p>
+            <button class="btn-primary" onclick="attemptLogin()">Join Chat</button>
+            <div id="login-error" style="color:var(--error); font-size:14px; display:none; text-align:center;"></div>
         </div>
     </div>
 
-    <!-- Hidden audio element to play incoming voice calls -->
-    <audio id="remote-audio" autoplay></audio>
+    <!-- Call Notification Overlay -->
+    <div id="call-notification" class="overlay">
+        <div class="modal-box" style="text-align: center;">
+            <h3 style="margin-bottom: 5px;">Incoming Call</h3>
+            <p id="caller-name" style="margin-top: 0; color: var(--text-muted);"></p>
+            <div class="call-buttons">
+                <button class="btn-success" onclick="acceptCall()">Accept</button>
+                <button class="btn-danger" onclick="declineCall()">Decline</button>
+            </div>
+        </div>
+    </div>
 
-    <!-- Server Bar -->
+    <!-- Settings Modal -->
+    <div id="settings-modal" class="overlay">
+        <div class="modal-box">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <h2>User Settings</h2>
+                <button class="close-btn" onclick="document.getElementById('settings-modal').style.display='none'">✖</button>
+            </div>
+            
+            <div class="settings-group">
+                <label>Change Username</label>
+                <input type="text" id="setting-name">
+            </div>
+
+            <div class="settings-group">
+                <label>Theme</label>
+                <select id="setting-theme">
+                    <option value="dark">Dark Mode</option>
+                    <option value="light">Light Mode</option>
+                </select>
+            </div>
+
+            <div class="settings-group">
+                <label>Call Volume</label>
+                <input type="range" id="setting-volume" min="0" max="1" step="0.05" value="1" oninput="updateVolume()">
+            </div>
+
+            <div class="settings-group">
+                <label>Microphone (Input)</label>
+                <select id="setting-mic"></select>
+            </div>
+
+            <div class="settings-group">
+                <label>Headphones (Output)</label>
+                <select id="setting-speaker"></select>
+            </div>
+
+            <button class="btn-primary" style="margin-top: 10px;" onclick="saveSettings()">Save Changes</button>
+        </div>
+    </div>
+
+    <!-- Main Layout -->
     <div class="server-bar">
         <div class="server-icon active-server" id="pub-icon" title="Public Server">PUB</div>
         <div class="server-icon" id="dm-icon" title="Direct Messages">DMs</div>
     </div>
 
-    <!-- Sidebar -->
     <div class="sidebar">
         <div class="sidebar-header" id="sidebar-title">Public Server</div>
-        <div class="channel-list" id="channel-list">
-            <div class="channel active" onclick="switchChannel('general')"># general</div>
-            <div class="channel" onclick="switchChannel('rules')"># rules</div>
-        </div>
+        <div class="channel-list" id="channel-list"></div>
         <div class="settings-bar">
             <span id="display-name">Loading...</span>
             <div>
-                <button class="settings-btn" onclick="toggleTheme()" title="Toggle Theme">🌓</button>
+                <button class="settings-btn" onclick="openSettings()" title="Settings">⚙️</button>
                 <button class="settings-btn" onclick="logout()" title="Logout">🚪</button>
             </div>
         </div>
     </div>
 
-    <!-- Chat Area -->
     <div class="chat-area">
         <div class="chat-header">
             <div class="header-left" id="chat-header-text"># general</div>
-            <button class="call-btn" id="call-button" onclick="initiateCall()">📞 Start Call</button>
+            <div class="call-controls" id="call-controls">
+                <button class="call-btn" id="start-call-btn" onclick="initiateCall()">📞 Call</button>
+                <button class="end-call-btn" id="end-call-btn" onclick="endCall()">🛑 End Call</button>
+            </div>
         </div>
         
         <div class="messages" id="messages"></div>
@@ -367,7 +244,6 @@
         </div>
     </div>
 
-    <!-- Right Panel -->
     <div class="member-list" id="member-list-ui">
         <div style="font-size: 12px; font-weight: bold; margin-bottom: 10px; color: var(--text-muted);">ONLINE</div>
     </div>
@@ -398,13 +274,22 @@
         let dmsSnapshot = null;
         let currentMessageUnsubscribe = null;
         
-        // PeerJS Voice Call Variables
+        // PeerJS & Hardware Settings
         let peer = null;
         let activeCall = null;
+        let localStream = null;
+        let incomingCallObj = null;
+        
+        let selectedMicId = 'default';
+        let selectedSpeakerId = 'default';
 
         // Auto-login check
         const savedName = localStorage.getItem("chatUsername");
         const savedPass = localStorage.getItem("chatPassword");
+        const savedTheme = localStorage.getItem("chatTheme");
+        
+        if (savedTheme === "light") document.body.setAttribute("data-theme", "light");
+
         if (savedName && savedPass) {
             document.getElementById("login-username").value = savedName;
             document.getElementById("login-password").value = savedPass;
@@ -419,26 +304,18 @@
             
             if (!user || !pass) {
                 errorDiv.innerText = "Please enter both fields.";
-                errorDiv.style.display = "block";
-                return;
+                errorDiv.style.display = "block"; return;
             }
 
-            const dbRef = ref(db);
-            get(child(dbRef, `auth/${user}`)).then((snapshot) => {
+            get(child(ref(db), `auth/${user}`)).then((snapshot) => {
                 if (snapshot.exists()) {
-                    // Check password
-                    if (snapshot.val().password === pass) {
-                        finalizeLogin(user, pass);
-                    } else {
-                        errorDiv.innerText = "Incorrect password.";
-                        errorDiv.style.display = "block";
-                    }
+                    if (snapshot.val().password === pass) finalizeLogin(user, pass);
+                    else { errorDiv.innerText = "Incorrect password."; errorDiv.style.display = "block"; }
                 } else {
-                    // Register new user
                     set(ref(db, `auth/${user}`), { password: pass });
                     finalizeLogin(user, pass);
                 }
-            }).catch((error) => {
+            }).catch(() => {
                 errorDiv.innerText = "Database error connecting.";
                 errorDiv.style.display = "block";
             });
@@ -454,57 +331,185 @@
             
             set(ref(db, 'users/' + myName), { online: true });
             
-            setupVoiceCalling(); // Start listening for calls
+            setupVoiceCalling();
             loadPublicMessages();
             startPresenceListeners();
+            switchChannel('general');
         }
 
         window.logout = function() {
-            set(ref(db, 'users/' + myName), null);
+            if(myName) set(ref(db, 'users/' + myName), null);
             localStorage.removeItem("chatUsername");
             localStorage.removeItem("chatPassword");
             location.reload();
         }
 
+        // --- SETTINGS MENU ---
+        window.openSettings = async function() {
+            document.getElementById('settings-modal').style.display = 'flex';
+            document.getElementById('setting-name').value = myName;
+            document.getElementById('setting-theme').value = document.body.getAttribute('data-theme') === 'light' ? 'light' : 'dark';
+            
+            // Request quick mic access to read hardware labels properly
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                stream.getTracks().forEach(t => t.stop());
+                
+                const devices = await navigator.mediaDevices.enumerateDevices();
+                const micSelect = document.getElementById('setting-mic');
+                const speakerSelect = document.getElementById('setting-speaker');
+                
+                micSelect.innerHTML = '<option value="default">System Default</option>';
+                speakerSelect.innerHTML = '<option value="default">System Default</option>';
+
+                devices.forEach(device => {
+                    if (device.kind === 'audioinput' && device.deviceId !== 'default') {
+                        micSelect.innerHTML += `<option value="${device.deviceId}" ${selectedMicId === device.deviceId ? 'selected' : ''}>${device.label || 'Microphone ' + device.deviceId}</option>`;
+                    }
+                    if (device.kind === 'audiooutput' && device.deviceId !== 'default') {
+                        speakerSelect.innerHTML += `<option value="${device.deviceId}" ${selectedSpeakerId === device.deviceId ? 'selected' : ''}>${device.label || 'Speaker ' + device.deviceId}</option>`;
+                    }
+                });
+            } catch (err) {
+                console.error("Mic permissions denied for reading list", err);
+            }
+        }
+
+        window.updateVolume = function() {
+            document.getElementById('remote-audio').volume = document.getElementById('setting-volume').value;
+        }
+
+        window.saveSettings = async function() {
+            // Theme
+            const theme = document.getElementById('setting-theme').value;
+            if (theme === 'light') { document.body.setAttribute("data-theme", "light"); localStorage.setItem("chatTheme", "light"); }
+            else { document.body.removeAttribute("data-theme"); localStorage.setItem("chatTheme", "dark"); }
+
+            // Hardware Selection
+            selectedMicId = document.getElementById('setting-mic').value;
+            selectedSpeakerId = document.getElementById('setting-speaker').value;
+            
+            // Output routing (sink id)
+            const audioEl = document.getElementById('remote-audio');
+            if (typeof audioEl.setSinkId !== 'undefined' && selectedSpeakerId !== 'default') {
+                audioEl.setSinkId(selectedSpeakerId).catch(e => console.error("Could not set speaker routing", e));
+            }
+
+            // Name Change Logic
+            const newName = document.getElementById('setting-name').value.trim();
+            if (newName && newName !== myName) {
+                const pass = localStorage.getItem("chatPassword");
+                // Check if name is taken
+                get(child(ref(db), `auth/${newName}`)).then((snapshot) => {
+                    if (snapshot.exists()) {
+                        alert("That username is already taken!");
+                    } else {
+                        // Migrate
+                        set(ref(db, `auth/${newName}`), { password: pass });
+                        set(ref(db, `users/${newName}`), { online: true });
+                        
+                        remove(ref(db, `auth/${myName}`));
+                        remove(ref(db, `users/${myName}`));
+                        
+                        myName = newName;
+                        localStorage.setItem("chatUsername", myName);
+                        document.getElementById("display-name").innerText = myName;
+                        
+                        // Recreate voice calling ID
+                        if (peer) peer.destroy();
+                        setupVoiceCalling();
+                    }
+                });
+            }
+            document.getElementById('settings-modal').style.display = 'none';
+        }
+
         // --- VOICE CALLING SYSTEM ---
         function setupVoiceCalling() {
-            // Initialize PeerJS with the user's chat name as their ID
             peer = new Peer(myName);
 
-            // Listen for incoming calls
             peer.on('call', (call) => {
-                if(confirm(`Incoming call from ${call.peer}. Do you want to answer?`)) {
-                    navigator.mediaDevices.getUserMedia({ audio: true, video: false }).then((stream) => {
-                        call.answer(stream); // Answer the call with an A/V stream.
-                        
-                        call.on('stream', (remoteStream) => {
-                            // Play their voice
-                            document.getElementById('remote-audio').srcObject = remoteStream;
-                        });
-                        activeCall = call;
-                    }).catch(err => alert("Failed to get microphone access."));
-                } else {
-                    call.close(); // Hang up if declined
-                }
+                incomingCallObj = call;
+                document.getElementById('caller-name').innerText = call.peer;
+                document.getElementById('call-notification').style.display = 'flex';
             });
         }
 
-        window.initiateCall = function() {
-            if (currentServer !== "dm" || !currentChannel) return;
-            
-            const targetUser = currentChannel;
-            alert(`Calling ${targetUser}... Make sure they have the chat open.`);
-            
-            navigator.mediaDevices.getUserMedia({ audio: true, video: false }).then((stream) => {
-                const call = peer.call(targetUser, stream);
+        // Getting hardware stream based on settings
+        async function getCustomMediaStream() {
+            const constraints = {
+                audio: selectedMicId === 'default' ? true : { deviceId: { exact: selectedMicId } },
+                video: false
+            };
+            return await navigator.mediaDevices.getUserMedia(constraints);
+        }
+
+        window.acceptCall = async function() {
+            document.getElementById('call-notification').style.display = 'none';
+            if(!incomingCallObj) return;
+
+            try {
+                localStream = await getCustomMediaStream();
+                incomingCallObj.answer(localStream);
                 
-                call.on('stream', (remoteStream) => {
-                    // Play their voice when they answer
+                incomingCallObj.on('stream', (remoteStream) => {
                     document.getElementById('remote-audio').srcObject = remoteStream;
                 });
-                activeCall = call;
-            }).catch(err => alert("Failed to get microphone access."));
+                
+                activeCall = incomingCallObj;
+                showActiveCallUI();
+                
+                incomingCallObj.on('close', resetCallUI);
+            } catch(e) { alert("Failed to access microphone."); }
         }
+
+        window.declineCall = function() {
+            document.getElementById('call-notification').style.display = 'none';
+            if(incomingCallObj) incomingCallObj.close();
+            incomingCallObj = null;
+        }
+
+        window.initiateCall = async function() {
+            if (currentServer !== "dm" || !currentChannel) return;
+            const targetUser = currentChannel;
+            
+            try {
+                localStream = await getCustomMediaStream();
+                const call = peer.call(targetUser, localStream);
+                
+                call.on('stream', (remoteStream) => {
+                    document.getElementById('remote-audio').srcObject = remoteStream;
+                });
+                
+                call.on('close', resetCallUI);
+                activeCall = call;
+                showActiveCallUI();
+                
+            } catch(err) { alert("Failed to access microphone."); }
+        }
+
+        window.endCall = function() {
+            if (activeCall) activeCall.close();
+            if (localStream) localStream.getTracks().forEach(track => track.stop());
+            resetCallUI();
+        }
+
+        function showActiveCallUI() {
+            document.getElementById('start-call-btn').style.display = 'none';
+            document.getElementById('end-call-btn').style.display = 'block';
+        }
+
+        function resetCallUI() {
+            activeCall = null;
+            if (localStream) localStream.getTracks().forEach(track => track.stop());
+            document.getElementById('remote-audio').srcObject = null;
+            
+            if (currentServer === "dm" && currentChannel !== "") {
+                document.getElementById('start-call-btn').style.display = 'block';
+                document.getElementById('end-call-btn').style.display = 'none';
+            }
+        }
+
 
         // --- MODERATION ---
         const blocklist = ["slur1", "slur2", "nsfwword1", "nsfwword2"];
@@ -519,10 +524,7 @@
 
         // --- CHAT LOGIC ---
         function clearMessageListener() {
-            if (currentMessageUnsubscribe) {
-                currentMessageUnsubscribe();
-                currentMessageUnsubscribe = null;
-            }
+            if (currentMessageUnsubscribe) { currentMessageUnsubscribe(); currentMessageUnsubscribe = null; }
         }
 
         function loadPublicMessages() {
@@ -547,33 +549,19 @@
             msgElement.className = "message";
             
             let contentHTML = '';
-            if (text) {
-                contentHTML += `<div class="msg-text">${text}</div>`;
-            }
-            if (imageUrl) {
-                contentHTML += `<div><img src="${imageUrl}" class="msg-image" onclick="window.open('${imageUrl}', '_blank')"></div>`;
-            }
+            if (text) contentHTML += `<div class="msg-text">${text}</div>`;
+            if (imageUrl) contentHTML += `<div><img src="${imageUrl}" class="msg-image" onclick="window.open('${imageUrl}', '_blank')"></div>`;
 
-            msgElement.innerHTML = `
-                <div class="msg-header">
-                    <span class="msg-author" onclick="startDM('${author}')">${author}</span>
-                </div>
-                ${contentHTML}
-            `;
+            msgElement.innerHTML = `<div class="msg-header"><span class="msg-author" onclick="startDM('${author}')">${author}</span></div>${contentHTML}`;
 
             msgElement.oncontextmenu = function(e) {
                 e.preventDefault();
                 if (author === myName) {
                     if (confirm("Unsend this message?")) {
-                        if (chatType === 'general') {
-                            remove(ref(db, 'messages/general/' + messageKey));
-                        } else if (chatType === 'dm') {
-                            remove(ref(db, 'dms/' + pathId + '/' + messageKey));
-                        }
+                        if (chatType === 'general') remove(ref(db, 'messages/general/' + messageKey));
+                        else remove(ref(db, 'dms/' + pathId + '/' + messageKey));
                     }
-                } else {
-                    alert("You can only unsend your own messages.");
-                }
+                } else alert("You can only unsend your own messages.");
             };
             messagesDiv.appendChild(msgElement);
         }
@@ -582,55 +570,35 @@
             if (e.key === 'Enter') {
                 const input = document.getElementById("message-input");
                 let text = input.value.trim();
-                
-                if (text !== "") {
-                    text = filterMessage(text);
-                    sendMessageData(text, null);
-                    input.value = "";
-                }
+                if (text !== "") { sendMessageData(filterMessage(text), null); input.value = ""; }
             }
         }
 
         window.handleImageUpload = function(event) {
             const file = event.target.files[0];
             if (!file) return;
-
             const reader = new FileReader();
-            reader.onload = function(e) {
-                const base64Image = e.target.result;
-                sendMessageData("", base64Image);
-            };
+            reader.onload = function(e) { sendMessageData("", e.target.result); };
             reader.readAsDataURL(file);
             event.target.value = "";
         }
 
         function sendMessageData(text, imageUrl) {
             if (currentServer === "public" && currentChannel === "general") {
-                push(ref(db, 'messages/general'), {
-                    author: myName,
-                    text: text,
-                    imageUrl: imageUrl || "",
-                    timestamp: Date.now()
-                });
+                push(ref(db, 'messages/general'), { author: myName, text: text, imageUrl: imageUrl || "", timestamp: Date.now() });
             } else if (currentServer === "dm" && currentChannel !== "") {
                 const dmPathId = [myName, currentChannel].sort().join("_");
-                push(ref(db, 'dms/' + dmPathId), {
-                    author: myName,
-                    text: text,
-                    imageUrl: imageUrl || "",
-                    timestamp: Date.now()
-                });
+                push(ref(db, 'dms/' + dmPathId), { author: myName, text: text, imageUrl: imageUrl || "", timestamp: Date.now() });
             }
         }
 
-        // --- SIDEBAR & PRESENCE RENDERING ---
+        // --- SIDEBAR RENDERING ---
         function startPresenceListeners() {
             onValue(ref(db, 'users'), (snapshot) => {
                 onlineUsersSnapshot = snapshot;
                 if (currentServer === "public") renderPublicSidebar();
                 else renderDMSidebar();
             });
-
             onValue(ref(db, 'dms'), (snapshot) => {
                 dmsSnapshot = snapshot;
                 if (currentServer === "dm") renderDMSidebar();
@@ -643,16 +611,12 @@
                 <div class="channel ${currentChannel === 'general' ? 'active' : ''}" onclick="switchChannel('general')"># general</div>
                 <div class="channel ${currentChannel === 'rules' ? 'active' : ''}" onclick="switchChannel('rules')"># rules</div>
             `;
-
             const memberListUI = document.getElementById("member-list-ui");
             memberListUI.innerHTML = '<div style="font-size: 12px; font-weight: bold; margin-bottom: 10px; color: var(--text-muted);">ONLINE</div>';
             if (onlineUsersSnapshot) {
-                onlineUsersSnapshot.forEach((childSnapshot) => {
-                    const user = childSnapshot.key;
+                onlineUsersSnapshot.forEach(child => {
                     const memDiv = document.createElement("div");
-                    memDiv.className = "member";
-                    memDiv.innerText = user;
-                    memDiv.onclick = () => startDM(user);
+                    memDiv.className = "member"; memDiv.innerText = child.key; memDiv.onclick = () => startDM(child.key);
                     memberListUI.appendChild(memDiv);
                 });
             }
@@ -664,105 +628,68 @@
             channelList.innerHTML = '<div style="font-size: 11px; font-weight: bold; margin-bottom: 8px; color: var(--text-muted); padding: 4px;">DIRECT MESSAGES</div>';
 
             const contacts = new Set();
-            if (onlineUsersSnapshot) {
-                onlineUsersSnapshot.forEach(child => {
-                    if (child.key !== myName) contacts.add(child.key);
-                });
-            }
-            if (dmsSnapshot) {
-                dmsSnapshot.forEach(child => {
-                    const pathId = child.key;
-                    if (pathId.includes(myName)) {
-                        const parts = pathId.split("_");
-                        const otherUser = parts[0] === myName ? parts[1] : parts[0];
-                        if (otherUser && otherUser !== myName) contacts.add(otherUser);
-                    }
-                });
-            }
+            if (onlineUsersSnapshot) onlineUsersSnapshot.forEach(child => { if (child.key !== myName) contacts.add(child.key); });
+            if (dmsSnapshot) dmsSnapshot.forEach(child => {
+                if (child.key.includes(myName)) {
+                    const parts = child.key.split("_"); const other = parts[0] === myName ? parts[1] : parts[0];
+                    if (other && other !== myName) contacts.add(other);
+                }
+            });
 
-            if (contacts.size === 0) {
-                channelList.innerHTML += '<div style="color: var(--text-muted); font-size: 12px; padding: 4px;">No users available.</div>';
-            } else {
-                contacts.forEach(user => {
-                    const dmDiv = document.createElement("div");
-                    dmDiv.className = "channel" + (currentChannel === user ? " active" : "");
-                    dmDiv.innerHTML = `👤 ${user}`;
-                    dmDiv.onclick = () => startDM(user);
-                    channelList.appendChild(dmDiv);
-                });
-            }
+            if (contacts.size === 0) channelList.innerHTML += '<div style="color: var(--text-muted); font-size: 12px; padding: 4px;">No users available.</div>';
+            else contacts.forEach(user => {
+                const dmDiv = document.createElement("div");
+                dmDiv.className = "channel" + (currentChannel === user ? " active" : "");
+                dmDiv.innerHTML = `👤 ${user}`; dmDiv.onclick = () => startDM(user);
+                channelList.appendChild(dmDiv);
+            });
         }
 
         window.switchChannel = function(channel) {
-            currentServer = "public";
-            currentChannel = channel;
-
+            currentServer = "public"; currentChannel = channel;
             document.getElementById("pub-icon").classList.add("active-server");
             document.getElementById("dm-icon").classList.remove("active-server");
-            document.getElementById("call-button").style.display = "none";
+            document.getElementById("call-controls").style.display = "none";
 
             renderPublicSidebar();
 
-            const msgs = document.getElementById("messages");
-            const inputArea = document.getElementById("input-area");
-            const rules = document.getElementById("rules-content");
-            const header = document.getElementById("chat-header-text");
+            const msgs = document.getElementById("messages"), inputArea = document.getElementById("input-area"), rules = document.getElementById("rules-content"), header = document.getElementById("chat-header-text");
 
             if (channel === 'rules') {
-                clearMessageListener();
-                msgs.style.display = "none";
-                inputArea.style.display = "none";
-                rules.style.display = "block";
-                header.innerText = "# rules";
+                clearMessageListener(); msgs.style.display = "none"; inputArea.style.display = "none"; rules.style.display = "block"; header.innerText = "# rules";
             } else {
-                msgs.style.display = "flex";
-                inputArea.style.display = "flex";
-                rules.style.display = "none";
-                header.innerText = "# general";
-                loadPublicMessages();
+                msgs.style.display = "flex"; inputArea.style.display = "flex"; rules.style.display = "none"; header.innerText = "# general"; loadPublicMessages();
             }
         }
 
         window.switchToDMHome = function() {
-            currentServer = "dm";
-            currentChannel = "";
-            clearMessageListener();
-
+            currentServer = "dm"; currentChannel = ""; clearMessageListener();
             document.getElementById("pub-icon").classList.remove("active-server");
             document.getElementById("dm-icon").classList.add("active-server");
-            document.getElementById("call-button").style.display = "none";
+            document.getElementById("call-controls").style.display = "none";
 
             renderDMSidebar();
 
             document.getElementById("chat-header-text").innerText = "Direct Messages";
             document.getElementById("rules-content").style.display = "none";
             document.getElementById("messages").style.display = "flex";
-            document.getElementById("messages").innerHTML = `
-                <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; color: var(--text-muted); text-align: center;">
-                    <h3>Direct Messages</h3>
-                    <p>Select a user from the left sidebar to start chatting privately.</p>
-                </div>
-            `;
+            document.getElementById("messages").innerHTML = `<div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; color: var(--text-muted); text-align: center;"><h3>Direct Messages</h3><p>Select a user from the left sidebar to start chatting.</p></div>`;
             document.getElementById("input-area").style.display = "none";
-
-            document.getElementById("member-list-ui").innerHTML = `
-                <div style="font-size: 12px; font-weight: bold; margin-bottom: 10px; color: var(--text-muted);">PROFILE</div>
-                <div style="color: var(--text-muted); font-size: 13px; padding: 4px;">Select a user to view profile</div>
-            `;
+            document.getElementById("member-list-ui").innerHTML = `<div style="font-size: 12px; font-weight: bold; margin-bottom: 10px; color: var(--text-muted);">PROFILE</div>`;
         }
 
         window.startDM = function(targetUser) {
             if (targetUser === myName) return;
-
-            currentServer = "dm";
-            currentChannel = targetUser;
-            clearMessageListener();
+            currentServer = "dm"; currentChannel = targetUser; clearMessageListener();
 
             document.getElementById("pub-icon").classList.remove("active-server");
             document.getElementById("dm-icon").classList.add("active-server");
             
-            // Show call button
-            document.getElementById("call-button").style.display = "block";
+            document.getElementById("call-controls").style.display = "flex";
+            if (!activeCall) {
+                document.getElementById('start-call-btn').style.display = 'block';
+                document.getElementById('end-call-btn').style.display = 'none';
+            }
 
             renderDMSidebar();
 
@@ -775,23 +702,15 @@
 
             document.getElementById("member-list-ui").innerHTML = `
                 <div style="display: flex; flex-direction: column; align-items: center; text-align: center; padding-top: 15px;">
-                    <div style="width: 72px; height: 72px; background-color: var(--accent); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 28px; font-weight: bold; color: white; margin-bottom: 10px;">
-                        ${targetUser.charAt(0).toUpperCase()}
-                    </div>
+                    <div style="width: 72px; height: 72px; background-color: var(--accent); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 28px; font-weight: bold; color: white; margin-bottom: 10px;">${targetUser.charAt(0).toUpperCase()}</div>
                     <div style="font-weight: bold; font-size: 16px; color: var(--text-main);">${targetUser}</div>
-                    <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 20px;">@${targetUser.toLowerCase()}</div>
-                    <div style="width: 100%; background: var(--bg-chat); padding: 10px; border-radius: 8px; text-align: left; font-size: 12px; margin-bottom: 15px;">
-                        <div style="font-weight: bold; margin-bottom: 4px; color: var(--text-muted); font-size: 10px;">ABOUT ME</div>
-                        <div>Encrypted private session between classes.</div>
-                    </div>
                 </div>
             `;
 
             const dmPathId = [myName, targetUser].sort().join("_");
-            const messagesDiv = document.getElementById("messages");
-
             currentMessageUnsubscribe = onValue(ref(db, 'dms/' + dmPathId), (snapshot) => {
                 if (currentServer !== "dm" || currentChannel !== targetUser) return;
+                const messagesDiv = document.getElementById("messages");
                 messagesDiv.innerHTML = "";
                 snapshot.forEach((childSnapshot) => {
                     const data = childSnapshot.val();
@@ -799,18 +718,6 @@
                 });
                 messagesDiv.scrollTop = messagesDiv.scrollHeight;
             });
-        }
-
-        document.getElementById("pub-icon").onclick = () => switchChannel('general');
-        document.getElementById("dm-icon").onclick = () => switchToDMHome();
-
-        window.toggleTheme = function() {
-            const body = document.body;
-            if (body.getAttribute("data-theme") === "light") {
-                body.removeAttribute("data-theme");
-            } else {
-                body.setAttribute("data-theme", "light");
-            }
         }
     </script>
 </body>
