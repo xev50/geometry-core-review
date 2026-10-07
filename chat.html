@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Global Comms</title>
-    <!-- PeerJS for Voice & Video Calls -->
+    <!-- PeerJS for Calls -->
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
     <style>
         :root {
@@ -49,7 +49,7 @@
         .btn-primary:hover { background-color: #4752c4; }
         .btn-success { background-color: var(--success); color: white; border: none; padding: 10px; border-radius: 4px; cursor: pointer; font-weight: bold; }
         .btn-danger { background-color: var(--error); color: white; border: none; padding: 10px; border-radius: 4px; cursor: pointer; font-weight: bold; }
-        .btn-small { padding: 4px 8px; font-size: 12px; border-radius: 4px; cursor: pointer; border: none; color: white; }
+        .btn-small { padding: 6px 12px; font-size: 13px; border-radius: 4px; cursor: pointer; border: none; color: white; font-weight: bold; }
         
         .call-buttons { display: flex; gap: 10px; justify-content: space-between; }
         .call-buttons button { flex: 1; }
@@ -77,15 +77,32 @@
         .settings-btn { background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 18px; transition: 0.2s;}
         .settings-btn:hover { color: var(--text-main); }
 
-        .chat-area { flex-grow: 1; display: flex; flex-direction: column; background-color: var(--bg-chat); min-width: 0; }
+        .chat-area { flex-grow: 1; display: flex; flex-direction: column; background-color: var(--bg-chat); min-width: 0; position: relative; }
         .chat-header { padding: 16px; font-weight: bold; box-shadow: 0 1px 2px rgba(0,0,0,0.1); display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }
         
-        /* Video Call UI */
-        .call-controls { display: none; gap: 10px; }
-        #video-container { display: none; background-color: var(--bg-server); padding: 10px; flex-shrink: 0; display: flex; justify-content: center; gap: 20px; align-items: center; border-bottom: 1px solid var(--hover); }
-        video { background-color: black; border-radius: 8px; max-height: 250px; }
-        #local-video { width: 200px; }
-        #remote-video { width: 400px; }
+        /* Discord-Style Call Grid UI */
+        #call-screen { display: none; flex-grow: 1; background-color: #111214; flex-direction: column; padding: 20px; gap: 20px; position: relative; }
+        .call-grid { flex-grow: 1; display: flex; justify-content: center; align-items: center; gap: 20px; flex-wrap: wrap; }
+        
+        .participant-card {
+            width: 450px; height: 320px; background-color: var(--bg-darker); border-radius: 12px;
+            display: flex; flex-direction: column; justify-content: center; align-items: center; position: relative;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5); border: 3px solid transparent; transition: border-color 0.1s ease;
+            overflow: hidden;
+        }
+        .participant-card.speaking { border-color: var(--success); box-shadow: 0 0 15px var(--success); }
+        
+        .participant-avatar {
+            width: 96px; height: 96px; background-color: var(--accent); border-radius: 50%;
+            display: flex; align-items: center; justify-content: center; font-size: 36px; font-weight: bold; color: white;
+            box-shadow: 0 0 10px rgba(0,0,0,0.3); border: 3px solid transparent; transition: border-color 0.1s ease;
+        }
+        .participant-card.speaking .participant-avatar { border-color: var(--success); box-shadow: 0 0 15px var(--success); }
+        
+        .participant-video { width: 100%; height: 100%; object-fit: cover; display: none; position: absolute; top: 0; left: 0; }
+        .participant-name { position: absolute; bottom: 12px; left: 16px; background-color: rgba(0,0,0,0.6); padding: 4px 10px; border-radius: 6px; font-size: 13px; font-weight: bold; z-index: 2; }
+        
+        .call-toolbar { display: flex; justify-content: center; gap: 15px; background-color: #2b2d31; padding: 12px; border-radius: 12px; width: fit-content; margin: 0 auto; }
 
         .messages { flex-grow: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; }
         .message { display: flex; flex-direction: column; padding: 4px 8px; border-radius: 4px; }
@@ -100,23 +117,28 @@
         .upload-btn { background-color: var(--bg-sidebar); color: var(--text-muted); border: none; width: 48px; height: 48px; border-radius: 8px; cursor: pointer; font-size: 20px; }
         
         .member-list { width: 240px; background-color: var(--bg-sidebar); padding: 20px 10px; overflow-y: auto; flex-shrink: 0; }
-        .member { padding: 8px; color: var(--text-muted); cursor: pointer; border-radius: 4px; }
+        .member { padding: 8px; color: var(--text-muted); cursor: pointer; border-radius: 4px; display: flex; align-items: center; gap: 8px; }
         .member:hover { background-color: var(--hover); color: var(--text-main); }
         
-        /* Friends Dashboard UI */
+        /* Avatar Profile Circle */
+        .user-avatar-sm { width: 32px; height: 32px; background-color: var(--accent); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; color: white; font-size: 14px; flex-shrink: 0; border: 2px solid transparent; }
+        .user-avatar-sm.speaking { border-color: var(--success); box-shadow: 0 0 8px var(--success); }
+
         #friends-dashboard { display: none; flex-grow: 1; background-color: var(--bg-chat); padding: 30px; overflow-y: auto; }
         .friends-header { border-bottom: 1px solid var(--hover); padding-bottom: 20px; margin-bottom: 20px; }
         .add-friend-box { display: flex; gap: 10px; margin-top: 15px; }
         .add-friend-box input { flex-grow: 1; padding: 10px; border-radius: 4px; border: 1px solid var(--bg-server); background-color: var(--bg-darker); color: var(--text-main); outline: none; }
         .friend-row { display: flex; justify-content: space-between; align-items: center; padding: 10px; background-color: var(--bg-darker); margin-bottom: 8px; border-radius: 8px; }
         .friend-actions { display: flex; gap: 8px; }
-        
         .checkbox-list { max-height: 150px; overflow-y: auto; background: var(--bg-darker); border-radius: 4px; padding: 5px; }
         .checkbox-list label { display: flex; align-items: center; gap: 10px; padding: 5px; cursor: pointer; }
         .checkbox-list label:hover { background: var(--hover); }
     </style>
 </head>
 <body>
+
+    <!-- Hidden audio element for receiving calls -->
+    <audio id="remote-audio" autoplay></audio>
 
     <!-- Login Overlay -->
     <div id="login-overlay" class="overlay">
@@ -164,11 +186,8 @@
                 <h2>Create Group Chat</h2>
                 <button class="close-btn" onclick="document.getElementById('create-group-modal').style.display='none'">✖</button>
             </div>
-            <input type="text" id="group-name-input" placeholder="Group Name (e.g., The Goon Platoon)">
-            <div class="settings-group">
-                <label>Select Friends</label>
-                <div class="checkbox-list" id="group-friends-list"></div>
-            </div>
+            <input type="text" id="group-name-input" placeholder="Group Name">
+            <div class="settings-group"><label>Select Friends</label><div class="checkbox-list" id="group-friends-list"></div></div>
             <button class="btn-primary" onclick="submitCreateGroup()">Create</button>
         </div>
     </div>
@@ -190,31 +209,13 @@
         </div>
         <div class="channel-list" id="channel-list"></div>
         <div class="settings-bar">
-            <span id="display-name">Loading...</span>
+            <div style="display:flex; align-items:center; gap:8px;">
+                <div class="user-avatar-sm" id="my-footer-avatar">?</div>
+                <span id="display-name" style="font-weight:bold; font-size:14px;">Loading...</span>
+            </div>
             <div>
                 <button class="settings-btn" onclick="openSettings()" title="Settings">⚙️</button>
                 <button class="settings-btn" onclick="logout()" title="Logout">🚪</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Friends Dashboard -->
-    <div id="friends-dashboard">
-        <div class="friends-header">
-            <h2>Friends</h2>
-            <div class="add-friend-box">
-                <input type="text" id="add-friend-input" placeholder="Enter username to add friend">
-                <button class="btn-primary" onclick="sendFriendRequest()">Send Request</button>
-            </div>
-        </div>
-        <div style="display:flex; gap: 30px;">
-            <div style="flex:1;">
-                <h3 style="color:var(--text-muted); font-size:14px;">PENDING REQUESTS</h3>
-                <div id="pending-friends-list"></div>
-            </div>
-            <div style="flex:1;">
-                <h3 style="color:var(--text-muted); font-size:14px;">ALL FRIENDS</h3>
-                <div id="accepted-friends-list"></div>
             </div>
         </div>
     </div>
@@ -223,21 +224,37 @@
     <div class="chat-area" id="chat-area">
         <div class="chat-header">
             <div style="display: flex; align-items: center; gap: 10px;" id="chat-header-text"># general</div>
-            <div class="call-controls" id="call-controls">
-                <button class="btn-success btn-small" id="start-voice-btn" onclick="initiateCall(false)">📞 Voice</button>
-                <button class="btn-primary btn-small" id="start-video-btn" onclick="initiateCall(true)">🎥 Video</button>
-                <button class="btn-warning btn-small" id="share-screen-btn" style="display:none; background-color: var(--warning); color: black;" onclick="toggleScreenShare()">📺 Screen Share</button>
-                <button class="btn-danger btn-small" id="end-call-btn" style="display:none;" onclick="endCall()">🛑 End Call</button>
+            <div class="call-controls" id="call-controls" style="display:none;">
+                <button class="btn-success btn-small" id="start-call-btn" onclick="initiateCall()">📞 Start Call</button>
             </div>
         </div>
         
-        <div id="video-container" style="display:none;">
-            <video id="local-video" autoplay muted></video>
-            <video id="remote-video" autoplay></video>
+        <!-- Discord Call Grid Screen -->
+        <div id="call-screen">
+            <div class="call-grid">
+                <!-- Local User Card -->
+                <div class="participant-card" id="local-card">
+                    <div class="participant-avatar" id="local-avatar">?</div>
+                    <video id="local-video" class="participant-video" autoplay muted></video>
+                    <div class="participant-name" id="local-name-label">You</div>
+                </div>
+                <!-- Remote User Card -->
+                <div class="participant-card" id="remote-card">
+                    <div class="participant-avatar" id="remote-avatar">?</div>
+                    <video id="remote-video" class="participant-video" autoplay></video>
+                    <div class="participant-name" id="remote-name-label">User</div>
+                </div>
+            </div>
+            <!-- In-Call Toolbar -->
+            <div class="call-toolbar">
+                <button class="btn-primary btn-small" id="cam-toggle-btn" onclick="toggleCamera()">📷 Cam Off</button>
+                <button class="btn-warning btn-small" id="screen-toggle-btn" onclick="toggleScreenShare()" style="color:black;">📺 Share Screen</button>
+                <button class="btn-danger btn-small" onclick="endCall()">🛑 Disconnect</button>
+            </div>
         </div>
 
         <div class="messages" id="messages"></div>
-        <div id="rules-content" style="display:none; padding: 20px;"><h2>Server Rules</h2><ol><li>No slurs or offensive language.</li><li>No NSFW content or discussions.</li><li>Be respectful.</li></ol></div>
+        <div id="rules-content" style="display:none; padding: 20px;"><h2>Server Rules</h2><ol><li>No slurs or offensive language.</li><li>No NSFW content.</li><li>Be respectful.</li></ol></div>
 
         <div class="input-area" id="input-area">
             <input type="file" id="image-file-input" accept="image/*" style="display: none;" onchange="handleImageUpload(event)">
@@ -247,6 +264,19 @@
     </div>
 
     <div class="member-list" id="member-list-ui"></div>
+    <div id="friends-dashboard">
+        <div class="friends-header">
+            <h2>Friends</h2>
+            <div class="add-friend-box">
+                <input type="text" id="add-friend-input" placeholder="Enter username to add friend">
+                <button class="btn-primary" onclick="sendFriendRequest()">Send Request</button>
+            </div>
+        </div>
+        <div style="display:flex; gap: 30px;">
+            <div style="flex:1;"><h3 style="color:var(--text-muted); font-size:14px;">PENDING</h3><div id="pending-friends-list"></div></div>
+            <div style="flex:1;"><h3 style="color:var(--text-muted); font-size:14px;">FRIENDS</h3><div id="accepted-friends-list"></div></div>
+        </div>
+    </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
@@ -286,44 +316,78 @@
 
         // --- GLOBAL STATE ---
         let myName = "";
-        let viewContext = "public"; // 'public', 'friends', 'dm', 'group'
+        let viewContext = "public";
         let currentChannelId = "general"; 
         
         let onlineUsers = {};
         let myFriends = {};
         let myGroups = {};
         
-        // Notifications
         let knownMsgCounts = { general: -1, dms: {}, groups: {} };
         let unreadCounts = { general: 0, dms: {}, groups: {} };
         
-        // Hardware & Call
         let peer = null;
         let activeCall = null;
         let localStream = null;
         let incomingCallObj = null;
         let selectedMicId = 'default';
         let selectedSpeakerId = 'default';
-        let isVideoCallActive = false;
+
+        let isCamActive = false;
+        let isScreenActive = false;
+        let micAnalyser = null;
+        let remoteAnalyser = null;
+
+        // --- AUDIO METER (SPEAKING GLOW DETECTOR) ---
+        function setupAudioAnalyser(stream, isLocal) {
+            try {
+                const source = audioCtx.createMediaStreamSource(stream);
+                const analyser = audioCtx.createAnalyser();
+                analyser.fftSize = 512;
+                source.connect(analyser);
+                if (isLocal) micAnalyser = analyser; else remoteAnalyser = analyser;
+            } catch(e) {}
+        }
+
+        setInterval(() => {
+            if (audioCtx.state === 'suspended') return;
+            // Local check
+            if (micAnalyser) {
+                const data = new Uint8Array(micAnalyser.frequencyBinCount);
+                micAnalyser.getByteFrequencyData(data);
+                let sum = 0; for (let i = 0; i < data.length; i++) sum += data[i];
+                let avg = sum / data.length;
+                const card = document.getElementById('local-card');
+                const avatar = document.getElementById('local-avatar');
+                if (avg > 12) { card.classList.add('speaking'); avatar.classList.add('speaking'); }
+                else { card.classList.remove('speaking'); avatar.classList.remove('speaking'); }
+            }
+            // Remote check
+            if (remoteAnalyser) {
+                const data = new Uint8Array(remoteAnalyser.frequencyBinCount);
+                remoteAnalyser.getByteFrequencyData(data);
+                let sum = 0; for (let i = 0; i < data.length; i++) sum += data[i];
+                let avg = sum / data.length;
+                const card = document.getElementById('remote-card');
+                const avatar = document.getElementById('remote-avatar');
+                if (avg > 12) { card.classList.add('speaking'); avatar.classList.add('speaking'); }
+                else { card.classList.remove('speaking'); avatar.classList.remove('speaking'); }
+            }
+        }, 100);
 
         // --- NOTIFICATION ENGINE ---
         function updateBadges() {
             const pubBadge = document.getElementById("pub-badge");
-            pubBadge.style.display = unreadCounts.general > 0 ? 'block' : 'none';
-            pubBadge.innerText = unreadCounts.general;
+            pubBadge.style.display = unreadCounts.general > 0 ? 'block' : 'none'; pubBadge.innerText = unreadCounts.general;
 
             const dmBadge = document.getElementById("dm-badge");
-            let dmTotal = 0;
-            Object.values(unreadCounts.dms).forEach(c => dmTotal += c);
-            Object.values(unreadCounts.groups).forEach(c => dmTotal += c);
-            dmBadge.style.display = dmTotal > 0 ? 'block' : 'none';
-            dmBadge.innerText = dmTotal;
+            let dmTotal = 0; Object.values(unreadCounts.dms).forEach(c => dmTotal += c); Object.values(unreadCounts.groups).forEach(c => dmTotal += c);
+            dmBadge.style.display = dmTotal > 0 ? 'block' : 'none'; dmBadge.innerText = dmTotal;
 
-            if (viewContext !== "public") renderDMSidebar();
-            else renderPublicSidebar();
+            if (viewContext !== "public") renderDMSidebar(); else renderPublicSidebar();
         }
 
-        // --- LOGIN SYSTEM ---
+        // --- LOGIN & AUTH ---
         window.attemptLogin = function() {
             if (audioCtx.state === 'suspended') audioCtx.resume();
             const user = document.getElementById("login-username").value.trim();
@@ -339,6 +403,7 @@
                     localStorage.setItem("chatUsername", myName); localStorage.setItem("chatPassword", pass);
                     document.getElementById("login-overlay").style.display = "none";
                     document.getElementById("display-name").innerText = myName;
+                    document.getElementById("my-footer-avatar").innerText = myName.charAt(0).toUpperCase();
                     set(ref(db, 'users/' + myName + '/online'), true);
                     setupVoiceCalling(); startGlobalListeners(); switchToPublic();
                 }
@@ -365,107 +430,173 @@
                 });
             } catch (err) {}
         }
-        window.updateVolume = function() { document.getElementById('remote-video').volume = document.getElementById('setting-volume').value; }
+        window.updateVolume = function() { document.getElementById('remote-audio').volume = document.getElementById('setting-volume').value; }
         window.saveSettings = async function() {
             const theme = document.getElementById('setting-theme').value;
             if (theme === 'light') { document.body.setAttribute("data-theme", "light"); localStorage.setItem("chatTheme", "light"); }
             else { document.body.removeAttribute("data-theme"); localStorage.setItem("chatTheme", "dark"); }
-            
-            selectedMicId = document.getElementById('setting-mic').value;
-            selectedSpeakerId = document.getElementById('setting-speaker').value;
-            const audioEl = document.getElementById('remote-video');
-            if (typeof audioEl.setSinkId !== 'undefined' && selectedSpeakerId !== 'default') audioEl.setSinkId(selectedSpeakerId).catch(()=>{});
-
+            selectedMicId = document.getElementById('setting-mic').value; selectedSpeakerId = document.getElementById('setting-speaker').value;
             document.getElementById('settings-modal').style.display = 'none';
         }
 
-        // --- VOICE / VIDEO CALLS ---
+        // --- VOICE / VIDEO CALL SYSTEM ---
         function setupVoiceCalling() {
             peer = new Peer(myName);
             peer.on('call', (call) => {
                 incomingCallObj = call;
-                const isVid = call.metadata && call.metadata.video;
-                document.getElementById('caller-name').innerText = call.peer + (isVid ? " (Video)" : " (Voice)");
+                document.getElementById('caller-name').innerText = call.peer;
                 document.getElementById('call-notification').style.display = 'flex';
                 startRinging();
             });
         }
-        async function getCustomMediaStream(video) {
-            const constraints = { audio: selectedMicId === 'default' ? true : { deviceId: { exact: selectedMicId } }, video: video };
-            return await navigator.mediaDevices.getUserMedia(constraints);
-        }
+
         window.acceptCall = async function() {
             document.getElementById('call-notification').style.display = 'none'; stopRinging(); playJoin();
             if(!incomingCallObj) return;
-            const isVid = incomingCallObj.metadata && incomingCallObj.metadata.video;
+
             try {
-                localStream = await getCustomMediaStream(isVid);
-                document.getElementById('local-video').srcObject = localStream;
+                localStream = await navigator.mediaDevices.getUserMedia({ audio: selectedMicId === 'default' ? true : { deviceId: { exact: selectedMicId } }, video: false });
+                setupAudioAnalyser(localStream, true);
+                
                 incomingCallObj.answer(localStream);
-                incomingCallObj.on('stream', (remoteStream) => { document.getElementById('remote-video').srcObject = remoteStream; });
-                activeCall = incomingCallObj; showActiveCallUI(isVid);
+                incomingCallObj.on('stream', (remoteStream) => {
+                    document.getElementById('remote-audio').srcObject = remoteStream;
+                    setupAudioAnalyser(remoteStream, false);
+                    const remoteVideo = document.getElementById('remote-video');
+                    remoteVideo.srcObject = remoteStream;
+                    remoteVideo.style.display = 'block';
+                    document.getElementById('remote-avatar').style.display = 'none';
+                });
+                activeCall = incomingCallObj; showCallScreen(incomingCallObj.peer);
                 incomingCallObj.on('close', resetCallUI);
-            } catch(e) { alert("Failed to access media devices."); resetCallUI(); }
+            } catch(e) { alert("Microphone access required."); resetCallUI(); }
         }
+
         window.declineCall = function() {
             document.getElementById('call-notification').style.display = 'none'; stopRinging(); playLeave();
             if(incomingCallObj) incomingCallObj.close(); incomingCallObj = null;
         }
-        window.initiateCall = async function(withVideo) {
+
+        window.initiateCall = async function() {
             if (viewContext !== "dm" || !currentChannelId) return;
             try {
-                localStream = await getCustomMediaStream(withVideo);
-                document.getElementById('local-video').srcObject = localStream;
-                const call = peer.call(currentChannelId, localStream, { metadata: { video: withVideo } });
-                call.on('stream', (remoteStream) => { playJoin(); document.getElementById('remote-video').srcObject = remoteStream; });
+                localStream = await navigator.mediaDevices.getUserMedia({ audio: selectedMicId === 'default' ? true : { deviceId: { exact: selectedMicId } }, video: false });
+                setupAudioAnalyser(localStream, true);
+
+                const call = peer.call(currentChannelId, localStream);
+                call.on('stream', (remoteStream) => {
+                    playJoin();
+                    document.getElementById('remote-audio').srcObject = remoteStream;
+                    setupAudioAnalyser(remoteStream, false);
+                    const remoteVideo = document.getElementById('remote-video');
+                    remoteVideo.srcObject = remoteStream;
+                    remoteVideo.style.display = 'block';
+                    document.getElementById('remote-avatar').style.display = 'none';
+                });
                 call.on('close', resetCallUI);
-                activeCall = call; showActiveCallUI(withVideo);
-            } catch(err) { alert("Failed to access media devices."); }
+                activeCall = call; showCallScreen(currentChannelId);
+            } catch(err) { alert("Microphone access required."); }
         }
+
+        window.toggleCamera = async function() {
+            if(!activeCall) return;
+            const localVideo = document.getElementById('local-video');
+            const localAvatar = document.getElementById('local-avatar');
+
+            if (!isCamActive) {
+                try {
+                    const camStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+                    const videoTrack = camStream.getVideoTracks()[0];
+                    
+                    const sender = activeCall.peerConnection.getSenders().find(s => s.track.kind === 'video');
+                    if(sender) sender.replaceTrack(videoTrack);
+                    
+                    localVideo.srcObject = camStream;
+                    localVideo.style.display = 'block';
+                    localAvatar.style.display = 'none';
+                    isCamActive = true; isScreenActive = false;
+                    document.getElementById('cam-toggle-btn').innerText = "📷 Cam On";
+                    document.getElementById('screen-toggle-btn').innerText = "📺 Share Screen";
+                } catch(e) { alert("Could not access camera."); }
+            } else {
+                const audioOnlyStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+                const audioTrack = audioOnlyStream.getAudioTracks()[0];
+                const sender = activeCall.peerConnection.getSenders().find(s => s.track.kind === 'video');
+                if(sender) sender.replaceTrack(null);
+
+                localVideo.srcObject = null;
+                localVideo.style.display = 'none';
+                localAvatar.style.display = 'flex';
+                isCamActive = false;
+                document.getElementById('cam-toggle-btn').innerText = "📷 Cam Off";
+            }
+        }
+
+        window.toggleScreenShare = async function() {
+            if(!activeCall) return;
+            const localVideo = document.getElementById('local-video');
+            const localAvatar = document.getElementById('local-avatar');
+
+            if (!isScreenActive) {
+                try {
+                    const screenStream = await navigator.mediaDevices.getDisplayMedia({ video: true });
+                    const videoTrack = screenStream.getVideoTracks()[0];
+                    
+                    const sender = activeCall.peerConnection.getSenders().find(s => s.track.kind === 'video');
+                    if(sender) sender.replaceTrack(videoTrack);
+
+                    localVideo.srcObject = screenStream;
+                    localVideo.style.display = 'block';
+                    localAvatar.style.display = 'none';
+                    isScreenActive = true; isCamActive = false;
+                    document.getElementById('screen-toggle-btn').innerText = "📺 Stop Sharing";
+                    document.getElementById('cam-toggle-btn').innerText = "📷 Cam Off";
+
+                    videoTrack.onended = () => { toggleScreenShare(); };
+                } catch(e) {}
+            } else {
+                const sender = activeCall.peerConnection.getSenders().find(s => s.track.kind === 'video');
+                if(sender) sender.replaceTrack(null);
+
+                localVideo.srcObject = null;
+                localVideo.style.display = 'none';
+                localAvatar.style.display = 'flex';
+                isScreenActive = false;
+                document.getElementById('screen-toggle-btn').innerText = "📺 Share Screen";
+            }
+        }
+
         window.endCall = function() {
             if (activeCall) activeCall.close();
             playLeave(); resetCallUI();
         }
-        window.toggleScreenShare = async function() {
-            if(!activeCall) return;
-            try {
-                const screenStream = await navigator.mediaDevices.getDisplayMedia({video: true});
-                const videoTrack = screenStream.getVideoTracks()[0];
-                const sender = activeCall.peerConnection.getSenders().find(s => s.track.kind === 'video');
-                if(sender) sender.replaceTrack(videoTrack);
-                document.getElementById('local-video').srcObject = screenStream;
 
-                videoTrack.onended = () => { // When browser 'stop sharing' is clicked
-                    if(localStream && sender) {
-                        sender.replaceTrack(localStream.getVideoTracks()[0]);
-                        document.getElementById('local-video').srcObject = localStream;
-                    }
-                };
-            } catch(e) {}
-        }
-        function showActiveCallUI(isVideo) {
-            isVideoCallActive = isVideo;
-            document.getElementById('start-voice-btn').style.display = 'none';
-            document.getElementById('start-video-btn').style.display = 'none';
-            document.getElementById('end-call-btn').style.display = 'block';
-            if(isVideo) {
-                document.getElementById('share-screen-btn').style.display = 'block';
-                document.getElementById('video-container').style.display = 'flex';
-            }
-        }
-        function resetCallUI() {
-            activeCall = null; isVideoCallActive = false;
-            if (localStream) localStream.getTracks().forEach(track => track.stop());
-            document.getElementById('remote-video').srcObject = null;
-            document.getElementById('local-video').srcObject = null;
-            document.getElementById('video-container').style.display = 'none';
-            document.getElementById('share-screen-btn').style.display = 'none';
+        function showCallScreen(remoteUser) {
+            document.getElementById("messages").style.display = "none";
+            document.getElementById("input-area").style.display = "none";
+            document.getElementById("call-screen").style.display = "flex";
             
-            if (viewContext === "dm") {
-                document.getElementById('start-voice-btn').style.display = 'block';
-                document.getElementById('start-video-btn').style.display = 'block';
-                document.getElementById('end-call-btn').style.display = 'none';
-            }
+            document.getElementById('local-name-label').innerText = myName;
+            document.getElementById('local-avatar').innerText = myName.charAt(0).toUpperCase();
+            
+            document.getElementById('remote-name-label').innerText = remoteUser;
+            document.getElementById('remote-avatar').innerText = remoteUser.charAt(0).toUpperCase();
+        }
+
+        function resetCallUI() {
+            activeCall = null; isCamActive = false; isScreenActive = false;
+            if (localStream) localStream.getTracks().forEach(t => t.stop());
+            document.getElementById('remote-audio').srcObject = null;
+            
+            document.getElementById("call-screen").style.display = "none";
+            document.getElementById("messages").style.display = "flex";
+            document.getElementById("input-area").style.display = "flex";
+            document.getElementById('local-video').style.display = 'none';
+            document.getElementById('remote-video').style.display = 'none';
+            document.getElementById('local-avatar').style.display = 'flex';
+            document.getElementById('remote-avatar').style.display = 'flex';
+            document.getElementById('cam-toggle-btn').innerText = "📷 Cam Off";
+            document.getElementById('screen-toggle-btn').innerText = "📺 Share Screen";
         }
 
         // --- GLOBAL LISTENERS ---
@@ -473,8 +604,7 @@
             onValue(ref(db, 'users'), (snapshot) => {
                 onlineUsers = snapshot.val() || {};
                 myFriends = (onlineUsers[myName] && onlineUsers[myName].friends) ? onlineUsers[myName].friends : {};
-                if (viewContext === "public") renderPublicSidebar();
-                else if (viewContext === "friends") renderFriendsDashboard();
+                if (viewContext === "public") renderPublicSidebar(); else if (viewContext === "friends") renderFriendsDashboard();
                 if (viewContext !== "public") renderDMSidebar();
             });
 
@@ -534,7 +664,7 @@
             });
         }
 
-        // --- FRIENDS & GROUPS LOGIC ---
+        // --- FRIENDS & GROUPS ---
         window.sendFriendRequest = function() {
             const target = document.getElementById("add-friend-input").value.trim();
             if(!target || target === myName) return;
@@ -555,45 +685,36 @@
 
         window.openCreateGroupModal = function() {
             const list = document.getElementById('group-friends-list'); list.innerHTML = '';
-            for(let f in myFriends) {
-                if(myFriends[f] === "accepted") {
-                    list.innerHTML += `<label><input type="checkbox" value="${f}"> ${f}</label>`;
-                }
-            }
-            if(list.innerHTML === '') list.innerHTML = '<span style="color:var(--text-muted); font-size:12px;">No accepted friends to add.</span>';
+            for(let f in myFriends) { if(myFriends[f] === "accepted") list.innerHTML += `<label><input type="checkbox" value="${f}"> ${f}</label>`; }
+            if(list.innerHTML === '') list.innerHTML = '<span style="color:var(--text-muted); font-size:12px;">No accepted friends.</span>';
             document.getElementById('create-group-modal').style.display = 'flex';
         }
         window.submitCreateGroup = function() {
             const name = document.getElementById('group-name-input').value.trim() || "New Group";
             const checkboxes = document.querySelectorAll('#group-friends-list input:checked');
             if(checkboxes.length === 0) { alert("Select at least one friend."); return; }
-            
-            const members = {}; members[myName] = true;
-            checkboxes.forEach(cb => members[cb.value] = true);
-            
+            const members = {}; members[myName] = true; checkboxes.forEach(cb => members[cb.value] = true);
             push(ref(db, 'groups'), { name: name, members: members, timestamp: Date.now() });
             document.getElementById('create-group-modal').style.display = 'none';
         }
 
         // --- RENDERING ---
         function renderFriendsDashboard() {
-            const pendList = document.getElementById("pending-friends-list");
-            const accList = document.getElementById("accepted-friends-list");
+            const pendList = document.getElementById("pending-friends-list"); const accList = document.getElementById("accepted-friends-list");
             pendList.innerHTML = ''; accList.innerHTML = '';
-            
             for(let f in myFriends) {
                 const status = myFriends[f];
                 if(status === "pending_incoming") {
-                    pendList.innerHTML += `<div class="friend-row"><span>👤 ${f} (Incoming)</span><div class="friend-actions"><button class="btn-success btn-small" onclick="acceptFriend('${f}')">✓</button><button class="btn-danger btn-small" onclick="removeFriend('${f}')">✖</button></div></div>`;
+                    pendList.innerHTML += `<div class="friend-row"><span>👤 ${f}</span><div class="friend-actions"><button class="btn-success btn-small" onclick="acceptFriend('${f}')">✓</button><button class="btn-danger btn-small" onclick="removeFriend('${f}')">✖</button></div></div>`;
                 } else if(status === "pending_outgoing") {
-                    pendList.innerHTML += `<div class="friend-row"><span>👤 ${f} (Outgoing)</span><button class="btn-danger btn-small" onclick="removeFriend('${f}')">Cancel</button></div>`;
+                    pendList.innerHTML += `<div class="friend-row"><span>👤 ${f} (Pending)</span><button class="btn-danger btn-small" onclick="removeFriend('${f}')">Cancel</button></div>`;
                 } else if(status === "accepted") {
                     const isOnline = onlineUsers[f] && onlineUsers[f].online ? '🟢' : '⚪';
                     accList.innerHTML += `<div class="friend-row"><span>${isOnline} ${f}</span><div class="friend-actions"><button class="btn-primary btn-small" onclick="switchToDM('${f}')">Message</button><button class="btn-danger btn-small" onclick="removeFriend('${f}')">Remove</button></div></div>`;
                 }
             }
             if(pendList.innerHTML === '') pendList.innerHTML = '<div style="color:var(--text-muted); font-size:12px;">No pending requests.</div>';
-            if(accList.innerHTML === '') accList.innerHTML = '<div style="color:var(--text-muted); font-size:12px;">No friends yet.</div>';
+            if(accList.innerHTML === '') accList.innerHTML = '<div style="color:var(--text-muted); font-size:12px;">No friends added yet.</div>';
         }
 
         function renderMessages(msgsObj, chatType, pathId) {
@@ -608,7 +729,7 @@
                 mEl.oncontextmenu = (e) => { e.preventDefault(); if (d.author === myName && confirm("Unsend message?")) {
                     if (chatType === 'general') remove(ref(db, 'messages/general/' + key));
                     else if (chatType === 'dm') remove(ref(db, 'dms/' + pathId + '/' + key));
-                    else if (chatType === 'group') remove(ref(db, 'groups/' + pathId + '/messages/' + key));
+                    else if (chatType === 'group') remove(ref(db, `groups/${pathId}/messages/${key}`));
                 }};
                 div.appendChild(mEl);
             }
@@ -627,7 +748,7 @@
             const memList = document.getElementById("member-list-ui");
             memList.innerHTML = '<div style="font-size: 12px; font-weight: bold; margin-bottom: 10px; color: var(--text-muted);">ONLINE</div>';
             for (let u in onlineUsers) {
-                if(onlineUsers[u].online) memList.innerHTML += `<div class="member" onclick="switchToDM('${u}')">${u}</div>`;
+                if(onlineUsers[u].online) memList.innerHTML += `<div class="member" onclick="switchToDM('${u}')"><div class="user-avatar-sm" style="width:24px;height:24px;font-size:11px;">${u.charAt(0).toUpperCase()}</div>${u}</div>`;
             }
         }
 
@@ -641,7 +762,7 @@
             for(let f in myFriends) {
                 if(myFriends[f] === "accepted") {
                     let uBadge = (unreadCounts.dms[f] > 0) ? `<div class="channel-badge" style="display:block;">${unreadCounts.dms[f]}</div>` : '';
-                    html += `<div class="channel ${(viewContext === 'dm' && currentChannelId === f) ? 'active' : ''}" onclick="switchToDM('${f}')"><div class="channel-left">👤 ${f}</div> ${uBadge}</div>`;
+                    html += `<div class="channel ${(viewContext === 'dm' && currentChannelId === f) ? 'active' : ''}" onclick="switchToDM('${f}')"><div class="channel-left"><div class="user-avatar-sm" style="width:24px;height:24px;font-size:11px;">${f.charAt(0).toUpperCase()}</div> ${f}</div> ${uBadge}</div>`;
                 }
             }
             
@@ -650,7 +771,6 @@
                 let gBadge = (unreadCounts.groups[g] > 0) ? `<div class="channel-badge" style="display:block;">${unreadCounts.groups[g]}</div>` : '';
                 html += `<div class="channel ${(viewContext === 'group' && currentChannelId === g) ? 'active' : ''}" onclick="switchToGroup('${g}')"><div class="channel-left">👥 ${myGroups[g].name}</div> ${gBadge}</div>`;
             }
-            
             document.getElementById("channel-list").innerHTML = html;
         }
 
@@ -686,7 +806,7 @@
         window.switchToDM = function(targetUser) {
             if (targetUser === myName) return;
             if (!myFriends[targetUser] || myFriends[targetUser] !== "accepted") {
-                if(!confirm(`You are not friends with ${targetUser}. Add them as a friend to DM?`)) return;
+                if(!confirm(`Send friend request to ${targetUser}?`)) return;
                 sendFriendRequest(targetUser); return;
             }
             
@@ -695,8 +815,6 @@
             document.getElementById("pub-icon").classList.remove("active-server"); document.getElementById("dm-icon").classList.add("active-server");
             
             document.getElementById("call-controls").style.display = "flex";
-            if(!activeCall) { document.getElementById('start-voice-btn').style.display = 'block'; document.getElementById('start-video-btn').style.display = 'block'; document.getElementById('end-call-btn').style.display = 'none'; }
-            
             renderDMSidebar(); setMainVisibility(true, false, false);
             document.getElementById("chat-header-text").innerText = `@ ${targetUser}`;
             document.getElementById("message-input").placeholder = `Message @${targetUser}`;
@@ -710,24 +828,21 @@
         window.switchToGroup = function(groupId) {
             viewContext = "group"; currentChannelId = groupId;
             unreadCounts.groups[groupId] = 0; updateBadges();
-            
             document.getElementById("pub-icon").classList.remove("active-server"); document.getElementById("dm-icon").classList.add("active-server");
-            document.getElementById("call-controls").style.display = "none"; // Group calls disabled for now
-            
+            document.getElementById("call-controls").style.display = "none";
             renderDMSidebar(); setMainVisibility(true, false, false);
             const grp = myGroups[groupId];
             document.getElementById("chat-header-text").innerText = `👥 ${grp.name}`;
             document.getElementById("message-input").placeholder = `Message ${grp.name}`;
-            
             renderMessages(grp.messages || {}, 'group', groupId);
             
-            let memUI = `<div style="font-size: 12px; font-weight: bold; margin-bottom: 10px; color: var(--text-muted);">MEMBERS (${Object.keys(grp.members).length})</div>`;
-            for(let m in grp.members) memUI += `<div class="member" onclick="switchToDM('${m}')">${m}</div>`;
+            let memUI = `<div style="font-size: 12px; font-weight: bold; margin-bottom: 10px; color: var(--text-muted);">MEMBERS</div>`;
+            for(let m in grp.members) memUI += `<div class="member" onclick="switchToDM('${m}')"><div class="user-avatar-sm" style="width:24px;height:24px;font-size:11px;">${m.charAt(0).toUpperCase()}</div>${m}</div>`;
             document.getElementById("member-list-ui").innerHTML = memUI;
         }
 
-        // --- MESSAGE INPUT ---
-        const blocklist = ["slur1", "slur2", "nsfwword1"];
+        // --- MESSAGING ---
+        const blocklist = ["slur1", "slur2"];
         function filterMessage(text) {
             let filtered = text; blocklist.forEach(w => filtered = filtered.replace(new RegExp(`\\b${w}\\b`, "gi"), "***")); return filtered;
         }
@@ -753,7 +868,6 @@
         const savedName = localStorage.getItem("chatUsername");
         const savedPass = localStorage.getItem("chatPassword");
         if (localStorage.getItem("chatTheme") === "light") document.body.setAttribute("data-theme", "light");
-        
         if (savedName && savedPass) {
             setTimeout(() => { document.getElementById("login-username").value = savedName; document.getElementById("login-password").value = savedPass; attemptLogin(); }, 100);
         }
