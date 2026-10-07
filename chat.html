@@ -51,6 +51,12 @@
             justify-content: center;
             align-items: center;
         }
+        
+        /* Solid Grey Background just for the login screen */
+        #login-overlay {
+            background-color: #808080; 
+        }
+
         .modal-box {
             background-color: var(--bg-chat);
             padding: 30px;
@@ -283,19 +289,6 @@
         let selectedMicId = 'default';
         let selectedSpeakerId = 'default';
 
-        // Auto-login check
-        const savedName = localStorage.getItem("chatUsername");
-        const savedPass = localStorage.getItem("chatPassword");
-        const savedTheme = localStorage.getItem("chatTheme");
-        
-        if (savedTheme === "light") document.body.setAttribute("data-theme", "light");
-
-        if (savedName && savedPass) {
-            document.getElementById("login-username").value = savedName;
-            document.getElementById("login-password").value = savedPass;
-            attemptLogin();
-        }
-
         // --- LOGIN SYSTEM ---
         window.attemptLogin = function() {
             const user = document.getElementById("login-username").value.trim();
@@ -350,7 +343,6 @@
             document.getElementById('setting-name').value = myName;
             document.getElementById('setting-theme').value = document.body.getAttribute('data-theme') === 'light' ? 'light' : 'dark';
             
-            // Request quick mic access to read hardware labels properly
             try {
                 const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
                 stream.getTracks().forEach(t => t.stop());
@@ -380,31 +372,25 @@
         }
 
         window.saveSettings = async function() {
-            // Theme
             const theme = document.getElementById('setting-theme').value;
             if (theme === 'light') { document.body.setAttribute("data-theme", "light"); localStorage.setItem("chatTheme", "light"); }
             else { document.body.removeAttribute("data-theme"); localStorage.setItem("chatTheme", "dark"); }
 
-            // Hardware Selection
             selectedMicId = document.getElementById('setting-mic').value;
             selectedSpeakerId = document.getElementById('setting-speaker').value;
             
-            // Output routing (sink id)
             const audioEl = document.getElementById('remote-audio');
             if (typeof audioEl.setSinkId !== 'undefined' && selectedSpeakerId !== 'default') {
                 audioEl.setSinkId(selectedSpeakerId).catch(e => console.error("Could not set speaker routing", e));
             }
 
-            // Name Change Logic
             const newName = document.getElementById('setting-name').value.trim();
             if (newName && newName !== myName) {
                 const pass = localStorage.getItem("chatPassword");
-                // Check if name is taken
                 get(child(ref(db), `auth/${newName}`)).then((snapshot) => {
                     if (snapshot.exists()) {
                         alert("That username is already taken!");
                     } else {
-                        // Migrate
                         set(ref(db, `auth/${newName}`), { password: pass });
                         set(ref(db, `users/${newName}`), { online: true });
                         
@@ -415,7 +401,6 @@
                         localStorage.setItem("chatUsername", myName);
                         document.getElementById("display-name").innerText = myName;
                         
-                        // Recreate voice calling ID
                         if (peer) peer.destroy();
                         setupVoiceCalling();
                     }
@@ -435,7 +420,6 @@
             });
         }
 
-        // Getting hardware stream based on settings
         async function getCustomMediaStream() {
             const constraints = {
                 audio: selectedMicId === 'default' ? true : { deviceId: { exact: selectedMicId } },
@@ -509,7 +493,6 @@
                 document.getElementById('end-call-btn').style.display = 'none';
             }
         }
-
 
         // --- MODERATION ---
         const blocklist = ["slur1", "slur2", "nsfwword1", "nsfwword2"];
@@ -719,6 +702,21 @@
                 messagesDiv.scrollTop = messagesDiv.scrollHeight;
             });
         }
+
+        // AUTO-LOGIN LOGIC MOVED TO THE BOTTOM
+        // This ensures all functions above are loaded into the browser memory before it tries to run them.
+        const savedName = localStorage.getItem("chatUsername");
+        const savedPass = localStorage.getItem("chatPassword");
+        const savedTheme = localStorage.getItem("chatTheme");
+        
+        if (savedTheme === "light") document.body.setAttribute("data-theme", "light");
+
+        if (savedName && savedPass) {
+            document.getElementById("login-username").value = savedName;
+            document.getElementById("login-password").value = savedPass;
+            window.attemptLogin(); 
+        }
+
     </script>
 </body>
 </html>
