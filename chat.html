@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Global Comms</title>
+    <!-- PeerJS for Voice Calls -->
+    <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
     <style>
         :root {
             --bg-server: #1e1f22;
@@ -13,6 +15,7 @@
             --text-muted: #949ba4;
             --accent: #5865F2;
             --hover: #3f4147;
+            --error: #da373c;
         }
 
         [data-theme="light"] {
@@ -23,6 +26,7 @@
             --text-muted: #5c5e66;
             --accent: #5865F2;
             --hover: #e0e1e5;
+            --error: #da373c;
         }
 
         body {
@@ -33,6 +37,56 @@
             display: flex;
             height: 100vh;
             overflow: hidden;
+        }
+
+        /* Login Overlay */
+        #login-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-color: var(--bg-server);
+            z-index: 9999;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .login-box {
+            background-color: var(--bg-chat);
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            text-align: center;
+            width: 300px;
+        }
+        .login-box input {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            background-color: var(--bg-sidebar);
+            border: none;
+            color: var(--text-main);
+            border-radius: 4px;
+            box-sizing: border-box;
+            outline: none;
+        }
+        .login-box button {
+            width: 100%;
+            padding: 10px;
+            background-color: var(--accent);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: 0.2s;
+        }
+        .login-box button:hover {
+            background-color: #4752c4;
+        }
+        #login-error {
+            color: var(--error);
+            margin-top: 10px;
+            font-size: 14px;
+            display: none;
         }
 
         /* Far Left Server Bar */
@@ -127,7 +181,26 @@
             box-shadow: 0 1px 2px rgba(0,0,0,0.1);
             display: flex;
             align-items: center;
+            justify-content: space-between;
+        }
+        .header-left {
+            display: flex;
+            align-items: center;
             gap: 10px;
+        }
+        .call-btn {
+            display: none;
+            background-color: #23a559;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: 0.2s;
+        }
+        .call-btn:hover {
+            background-color: #1a7a42;
         }
         .messages {
             flex-grow: 1;
@@ -232,6 +305,21 @@
 </head>
 <body>
 
+    <!-- Login Overlay -->
+    <div id="login-overlay">
+        <div class="login-box">
+            <h2 style="margin-top:0;">Sign In</h2>
+            <input type="text" id="login-username" placeholder="Username" autocomplete="off">
+            <input type="password" id="login-password" placeholder="Password">
+            <button onclick="attemptLogin()">Join Chat</button>
+            <div id="login-error">Invalid password.</div>
+            <p style="font-size:12px; color:var(--text-muted); margin-top:15px;">If the username doesn't exist, it will register automatically.</p>
+        </div>
+    </div>
+
+    <!-- Hidden audio element to play incoming voice calls -->
+    <audio id="remote-audio" autoplay></audio>
+
     <!-- Server Bar -->
     <div class="server-bar">
         <div class="server-icon active-server" id="pub-icon" title="Public Server">PUB</div>
@@ -249,18 +337,19 @@
             <span id="display-name">Loading...</span>
             <div>
                 <button class="settings-btn" onclick="toggleTheme()" title="Toggle Theme">🌓</button>
-                <button class="settings-btn" onclick="changeName()" title="Change Name">⚙️</button>
+                <button class="settings-btn" onclick="logout()" title="Logout">🚪</button>
             </div>
         </div>
     </div>
 
     <!-- Chat Area -->
     <div class="chat-area">
-        <div class="chat-header" id="chat-header"># general</div>
-        
-        <div class="messages" id="messages">
-            <!-- Messages load here -->
+        <div class="chat-header">
+            <div class="header-left" id="chat-header-text"># general</div>
+            <button class="call-btn" id="call-button" onclick="initiateCall()">📞 Start Call</button>
         </div>
+        
+        <div class="messages" id="messages"></div>
 
         <div id="rules-content">
             <h2>Server Rules</h2>
@@ -281,13 +370,12 @@
     <!-- Right Panel -->
     <div class="member-list" id="member-list-ui">
         <div style="font-size: 12px; font-weight: bold; margin-bottom: 10px; color: var(--text-muted);">ONLINE</div>
-        <!-- Members load here -->
     </div>
 
-    <!-- Firebase SDK Setup -->
+    <!-- Firebase & Logic Setup -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getDatabase, ref, push, set, onValue, remove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+        import { getDatabase, ref, push, set, onValue, remove, get, child } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyDegqgPPUUXHnfe3ZcZ8K8BG4t-RUEVlUQ",
@@ -302,26 +390,124 @@
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
-        // User Setup
-        let myName = localStorage.getItem("chatUsername");
-        if (!myName) {
-            myName = prompt("Enter your username:");
-            localStorage.setItem("chatUsername", myName);
-        }
-        document.getElementById("display-name").innerText = myName;
-
-        set(ref(db, 'users/' + myName), { online: true });
-
-        // App States
+        // Global State
+        let myName = "";
         let currentServer = "public"; 
         let currentChannel = "general"; 
         let onlineUsersSnapshot = null;
         let dmsSnapshot = null;
-        let currentMessageUnsubscribe = null; // Tracks active chat listener to prevent duplication
-
-        // Moderation Filter
-        const blocklist = ["slur1", "slur2", "nsfwword1", "nsfwword2"];
+        let currentMessageUnsubscribe = null;
         
+        // PeerJS Voice Call Variables
+        let peer = null;
+        let activeCall = null;
+
+        // Auto-login check
+        const savedName = localStorage.getItem("chatUsername");
+        const savedPass = localStorage.getItem("chatPassword");
+        if (savedName && savedPass) {
+            document.getElementById("login-username").value = savedName;
+            document.getElementById("login-password").value = savedPass;
+            attemptLogin();
+        }
+
+        // --- LOGIN SYSTEM ---
+        window.attemptLogin = function() {
+            const user = document.getElementById("login-username").value.trim();
+            const pass = document.getElementById("login-password").value.trim();
+            const errorDiv = document.getElementById("login-error");
+            
+            if (!user || !pass) {
+                errorDiv.innerText = "Please enter both fields.";
+                errorDiv.style.display = "block";
+                return;
+            }
+
+            const dbRef = ref(db);
+            get(child(dbRef, `auth/${user}`)).then((snapshot) => {
+                if (snapshot.exists()) {
+                    // Check password
+                    if (snapshot.val().password === pass) {
+                        finalizeLogin(user, pass);
+                    } else {
+                        errorDiv.innerText = "Incorrect password.";
+                        errorDiv.style.display = "block";
+                    }
+                } else {
+                    // Register new user
+                    set(ref(db, `auth/${user}`), { password: pass });
+                    finalizeLogin(user, pass);
+                }
+            }).catch((error) => {
+                errorDiv.innerText = "Database error connecting.";
+                errorDiv.style.display = "block";
+            });
+        }
+
+        function finalizeLogin(username, password) {
+            myName = username;
+            localStorage.setItem("chatUsername", myName);
+            localStorage.setItem("chatPassword", password);
+            
+            document.getElementById("login-overlay").style.display = "none";
+            document.getElementById("display-name").innerText = myName;
+            
+            set(ref(db, 'users/' + myName), { online: true });
+            
+            setupVoiceCalling(); // Start listening for calls
+            loadPublicMessages();
+            startPresenceListeners();
+        }
+
+        window.logout = function() {
+            set(ref(db, 'users/' + myName), null);
+            localStorage.removeItem("chatUsername");
+            localStorage.removeItem("chatPassword");
+            location.reload();
+        }
+
+        // --- VOICE CALLING SYSTEM ---
+        function setupVoiceCalling() {
+            // Initialize PeerJS with the user's chat name as their ID
+            peer = new Peer(myName);
+
+            // Listen for incoming calls
+            peer.on('call', (call) => {
+                if(confirm(`Incoming call from ${call.peer}. Do you want to answer?`)) {
+                    navigator.mediaDevices.getUserMedia({ audio: true, video: false }).then((stream) => {
+                        call.answer(stream); // Answer the call with an A/V stream.
+                        
+                        call.on('stream', (remoteStream) => {
+                            // Play their voice
+                            document.getElementById('remote-audio').srcObject = remoteStream;
+                        });
+                        activeCall = call;
+                    }).catch(err => alert("Failed to get microphone access."));
+                } else {
+                    call.close(); // Hang up if declined
+                }
+            });
+        }
+
+        window.initiateCall = function() {
+            if (currentServer !== "dm" || !currentChannel) return;
+            
+            const targetUser = currentChannel;
+            alert(`Calling ${targetUser}... Make sure they have the chat open.`);
+            
+            navigator.mediaDevices.getUserMedia({ audio: true, video: false }).then((stream) => {
+                const call = peer.call(targetUser, stream);
+                
+                call.on('stream', (remoteStream) => {
+                    // Play their voice when they answer
+                    document.getElementById('remote-audio').srcObject = remoteStream;
+                });
+                activeCall = call;
+            }).catch(err => alert("Failed to get microphone access."));
+        }
+
+        // --- MODERATION ---
+        const blocklist = ["slur1", "slur2", "nsfwword1", "nsfwword2"];
         window.filterMessage = function(text) {
             let filtered = text;
             blocklist.forEach(word => {
@@ -331,14 +517,13 @@
             return filtered;
         }
 
+        // --- CHAT LOGIC ---
         function clearMessageListener() {
             if (currentMessageUnsubscribe) {
-                currentMessageUnsubscribe(); // Detaches the old Firebase listener
+                currentMessageUnsubscribe();
                 currentMessageUnsubscribe = null;
             }
         }
-
-        loadPublicMessages();
 
         function loadPublicMessages() {
             if (currentServer !== "public" || currentChannel !== "general") return;
@@ -376,7 +561,6 @@
                 ${contentHTML}
             `;
 
-            // Right-click event to unsend message
             msgElement.oncontextmenu = function(e) {
                 e.preventDefault();
                 if (author === myName) {
@@ -391,11 +575,9 @@
                     alert("You can only unsend your own messages.");
                 }
             };
-
             messagesDiv.appendChild(msgElement);
         }
 
-        // Send Text Message
         window.handleKeyPress = function(e) {
             if (e.key === 'Enter') {
                 const input = document.getElementById("message-input");
@@ -409,7 +591,6 @@
             }
         }
 
-        // Handle Image Upload & Conversion
         window.handleImageUpload = function(event) {
             const file = event.target.files[0];
             if (!file) return;
@@ -420,7 +601,7 @@
                 sendMessageData("", base64Image);
             };
             reader.readAsDataURL(file);
-            event.target.value = ""; // Reset file input
+            event.target.value = "";
         }
 
         function sendMessageData(text, imageUrl) {
@@ -440,6 +621,20 @@
                     timestamp: Date.now()
                 });
             }
+        }
+
+        // --- SIDEBAR & PRESENCE RENDERING ---
+        function startPresenceListeners() {
+            onValue(ref(db, 'users'), (snapshot) => {
+                onlineUsersSnapshot = snapshot;
+                if (currentServer === "public") renderPublicSidebar();
+                else renderDMSidebar();
+            });
+
+            onValue(ref(db, 'dms'), (snapshot) => {
+                dmsSnapshot = snapshot;
+                if (currentServer === "dm") renderDMSidebar();
+            });
         }
 
         function renderPublicSidebar() {
@@ -498,35 +693,20 @@
             }
         }
 
-        onValue(ref(db, 'users'), (snapshot) => {
-            onlineUsersSnapshot = snapshot;
-            if (currentServer === "public") {
-                renderPublicSidebar();
-            } else {
-                renderDMSidebar();
-            }
-        });
-
-        onValue(ref(db, 'dms'), (snapshot) => {
-            dmsSnapshot = snapshot;
-            if (currentServer === "dm") {
-                renderDMSidebar();
-            }
-        });
-
         window.switchChannel = function(channel) {
             currentServer = "public";
             currentChannel = channel;
 
             document.getElementById("pub-icon").classList.add("active-server");
             document.getElementById("dm-icon").classList.remove("active-server");
+            document.getElementById("call-button").style.display = "none";
 
             renderPublicSidebar();
 
             const msgs = document.getElementById("messages");
             const inputArea = document.getElementById("input-area");
             const rules = document.getElementById("rules-content");
-            const header = document.getElementById("chat-header");
+            const header = document.getElementById("chat-header-text");
 
             if (channel === 'rules') {
                 clearMessageListener();
@@ -550,10 +730,11 @@
 
             document.getElementById("pub-icon").classList.remove("active-server");
             document.getElementById("dm-icon").classList.add("active-server");
+            document.getElementById("call-button").style.display = "none";
 
             renderDMSidebar();
 
-            document.getElementById("chat-header").innerText = "Direct Messages";
+            document.getElementById("chat-header-text").innerText = "Direct Messages";
             document.getElementById("rules-content").style.display = "none";
             document.getElementById("messages").style.display = "flex";
             document.getElementById("messages").innerHTML = `
@@ -579,10 +760,13 @@
 
             document.getElementById("pub-icon").classList.remove("active-server");
             document.getElementById("dm-icon").classList.add("active-server");
+            
+            // Show call button
+            document.getElementById("call-button").style.display = "block";
 
             renderDMSidebar();
 
-            document.getElementById("chat-header").innerText = `@ ${targetUser}`;
+            document.getElementById("chat-header-text").innerText = `@ ${targetUser}`;
             document.getElementById("input-area").style.display = "flex";
             document.getElementById("rules-content").style.display = "none";
             document.getElementById("messages").style.display = "flex";
@@ -617,12 +801,8 @@
             });
         }
 
-        document.getElementById("pub-icon").onclick = function() {
-            switchChannel('general');
-        };
-        document.getElementById("dm-icon").onclick = function() {
-            switchToDMHome();
-        };
+        document.getElementById("pub-icon").onclick = () => switchChannel('general');
+        document.getElementById("dm-icon").onclick = () => switchToDMHome();
 
         window.toggleTheme = function() {
             const body = document.body;
@@ -630,17 +810,6 @@
                 body.removeAttribute("data-theme");
             } else {
                 body.setAttribute("data-theme", "light");
-            }
-        }
-
-        window.changeName = function() {
-            const newName = prompt("Enter new username:");
-            if (newName) {
-                set(ref(db, 'users/' + myName), null);
-                myName = newName;
-                localStorage.setItem("chatUsername", myName);
-                document.getElementById("display-name").innerText = myName;
-                set(ref(db, 'users/' + myName), { online: true });
             }
         }
     </script>
